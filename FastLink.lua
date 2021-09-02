@@ -5,7 +5,7 @@ require "lib.moonloader"
 
 script_name("FastLink")
 script_author("—ÓÃË ")
-script_version("1.31")
+script_version("1.4")
 local sampev = require "lib.samp.events"
 local keys = require "vkeys"
 local dlstatus = require('moonloader').download_status
@@ -15,8 +15,8 @@ local main_color = 0x5A90CE
 local color_text = "{FFFF00}"
 local tag = "[Fastlink]: "
 
-local script_vers = 1
-local script_vers_text = "1.31"
+local script_vers = 2
+local script_vers_text = "1.4"
 local script_path = thisScript().path
 local script_url = "https://raw.githubusercontent.com/SoMiK3/FastLink/main/FastLink.lua"
 local update_path = getWorkingDirectory() .. "/update.ini"
