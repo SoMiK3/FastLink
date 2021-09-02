@@ -15,8 +15,8 @@ local main_color = 0x5A90CE
 local color_text = "{FFFF00}"
 local tag = "[Fastlink]: "
 
-local script_vers = 2
-local script_vers_text = "1.4"
+local script_vers = 1
+local script_vers_text = "1.31"
 local script_path = thisScript().path
 local script_url = "https://raw.githubusercontent.com/SoMiK3/FastLink/main/FastLink.lua"
 local update_path = getWorkingDirectory() .. "/update.ini"
@@ -322,7 +322,7 @@ function main()
 			checkupd = true
 			updateIni = inicfg.load(nil, update_path)
 			if tonumber(updateIni.info.vers) > script_vers then
-				sampAddChatMessage(tag .. color_text .. "Есть {FFFFFF}обновление{FFFF00}! Новая версия: {FFFFFF}1.4{FFFF00}. Текущая версия: {FFFFFF}".. script_vers_text .. "{FFFF00}.", main_color)
+				sampAddChatMessage(tag .. color_text .. "Есть {FFFFFF}обновление{FFFF00}! Новая версия: {FFFFFF}" .. updateIni.info.vers_text .."{FFFF00}. Текущая версия: {FFFFFF}".. script_vers_text .. "{FFFF00}.", main_color)
 				sampAddChatMessage(tag .. color_text .. "Узнать изменения можно в группе скрипта во {FFFFFF}ВКонтакте{FFFF00}. Команда для перехода: {FFFFFF}/fastlinkupdateinfo", main_color)
 				sampAddChatMessage(tag .. color_text .. "Чтобы {FFFFFF}установить{FFFF00} обновление, необходимо ввести {FFFFFF}/fastlinkupdate", main_color)
 				mbobnova = true
@@ -353,9 +353,8 @@ function main()
 		if obnova then
 			downloadUrlToFile(script_url, script_path, function(id, status)
 				if status == dlstatus.STATUS_ENDDOWNLOADDATA then
-					sampAddChatMessage(tag .. color_text .. "Обновление {FFFFFF}успешно{FFFF00} установлено. Новая версия: {FFFFFF}" .. script_vers_text, main_color)
-					sampAddChatMessage(tag .. color_text .. "Узнать историю обновлений можно" .. script_vers_text, main_color)
-					thisScript():reload()
+					sampAddChatMessage(tag .. color_text .. "Обновление {FFFFFF}успешно{FFFF00} установлено. Новая версия: {FFFFFF}" .. updateIni.info.vers_text, main_color)
+					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Узнать{FFFF00} историю обновлений можно, введя {FFFFFF}/fastlinkupdatehistory", main_color)
 				end
 			end)
 			break
@@ -430,7 +429,7 @@ function updcheck()
 				checkupd = true
 				updateIni = inicfg.load(nil, update_path)
 				if tonumber(updateIni.info.vers) > script_vers then
-					sampAddChatMessage(tag .. color_text .. "Есть {FFFFFF}обновление{FFFF00}! Новая версия: {FFFFFF}1.4{FFFF00}. Текущая версия: {FFFFFF}".. script_vers_text .. "{FFFF00}.", main_color)
+					sampAddChatMessage(tag .. color_text .. "Есть {FFFFFF}обновление{FFFF00}! Новая версия: {FFFFFF}" .. updateIni.info.vers_text .. "{FFFF00}. Текущая версия: {FFF-FFF}".. script_vers_text .. "{FFFF00}.", main_color)
 					sampAddChatMessage(tag .. color_text .. "Узнать изменения можно в группе скрипта во {FFFFFF}ВКонтакте{FFFF00}. Команда для перехода: {FFFFFF}/fastlinkupdateinfo", main_color)
 					sampAddChatMessage(tag .. color_text .. "Чтобы {FFFFFF}установить{FFFF00} обновление, необходимо ввести {FFFFFF}/fastlinkupdate", main_color)
 					mbobnova = true
