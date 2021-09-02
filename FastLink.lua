@@ -15,10 +15,10 @@ local main_color = 0x5A90CE
 local color_text = "{FFFF00}"
 local tag = "[Fastlink]: "
 
-local script_vers = 1
-local script_vers_text = "1.31"
+local script_vers = 2
+local script_vers_text = "1.4"
 local script_path = thisScript().path
-local script_url = ""
+local script_url = "https://raw.githubusercontent.com/SoMiK3/FastLink/main/FastLink.lua"
 local update_path = getWorkingDirectory() .. "/update.ini"
 local update_url = "https://raw.githubusercontent.com/SoMiK3/FastLink/main/update.ini"
 
@@ -32,6 +32,7 @@ function main()
 	sampRegisterChatCommand("fastlinkupdate", upd)
 	sampRegisterChatCommand("fastlinkupdateinfo", updinfo)
 	sampRegisterChatCommand("fastlinkupdatecheck", updcheck)
+	sampRegisterChatCommand("fastlinkupdatehistory", history)
 
 	work = true
 	abobus = false
@@ -349,6 +350,16 @@ function main()
 			sampAddChatMessage(tag .. color_text .. "{FFFFFF}Переходим {FFFF00}по ссылке...", main_color)
 			os.execute("start https://www.blast.hk/threads/98245/")
 		end
+		if obnova then
+			downloadUrlToFile(script_url, script_path, function(id, status)
+				if status == dlstatus.STATUS_ENDDOWNLOADDATA then
+					sampAddChatMessage(tag .. color_text .. "Обновление {FFFFFF}успешно{FFFF00} установлено. Новая версия: {FFFFFF}" .. script_vers_text, main_color)
+					sampAddChatMessage(tag .. color_text .. "Узнать историю обновлений можно" .. script_vers_text, main_color)
+					thisScript():reload()
+				end
+			end)
+			break
+		end
 	end
 end
 
@@ -394,6 +405,7 @@ function info()
 	sampAddChatMessage(tag .. "{FFFFFF}." .. table.concat(l,", .", 230, 250), main_color)
 	sampAddChatMessage(tag .. "{FFFFFF}." .. table.concat(l,", .", 251, 269), main_color)
 	sampAddChatMessage(tag .. color_text .. "Чтобы скрипт прекратил/начал отлавливать ссылки в чате (по умолчанию вкл), достаточно ввести команду: {FFFFFF}/fastlinkwork", main_color)
+	sampAddChatMessage(tag .. color_text .. "Чтобы проверить наличие {FFFFFF}обновлений{FFFF00} скрипта, достаточно ввести {FFFFFF}/fastlinkupdatecheck", main_color)
 end
 
 function updinfo()
@@ -403,7 +415,8 @@ end
 
 function upd()
 	if mbobnova then
-
+		sampAddChatMessage(tag .. color_text .. "Начинаю {FFFFFF}устанавливать {FFFF00}найденное обновление", main_color)
+		obnova = true
 	else
 		sampAddChatMessage(tag .. color_text .. "Обновлений {FFFFFF}не найдено{FFFF00}. Проверить наличие обновлений повторно можно введя {FFFFFF}/fastlinkupdatecheck", main_color)
 	end
@@ -433,6 +446,10 @@ function updcheck()
 	else
 		sampAddChatMessage(tag .. color_text .. "Повторите проверку на наличие обновлений чуть {FFFFFF}позже{FFFF00}! Сейчас уже проходит данная проверка.", main_color)
 	end
+end
+
+function history()
+	sampShowDialog(1337, "{FFFF00}История обновлений скрипта {FFFFFF}FastLink", "{FFFF00}Версия {FFFFFF}1.0{FFFF00}:\n{FFFFFF}- Релиз\n{FFFF00}Версия {FFFFFF}1.1{FFFF00}:\n{FFFFFF}- Теперь если в ссылке нет https:// или http://, скрипт найдет эту ссылку, если у нее будет один из доменов из массива\n{FFFF00}Версия {FFFFFF}1.2{FFFF00}:\n{FFFFFF}- Была добавлена команда, показывающая всю информацию о скрипте, \"/fastlinkinfo\"\n- Была добавлена возможность отключать скрипт (по умолчанию включен), \"/fastlinkwork\"\n{FFFF00}Версия {FFFFFF}1.21{FFFF00}:\n{FFFFFF}- Добавлен домен: .sk (для яндекс диска)\n{FFFF00}Версия {FFFFFF}1.3{FFFF00}:\n{FFFFFF}- Добавлено очень много новых доменов\n{FFFF00}Версия {FFFFFF}1.31{FFFF00}:\n{FFFFFF}- Более точное обнаружение ссылок в чате (доведено до идеала)\n{FFFF00}Версия {FFFFFF}1.4{FFFF00}:\n{FFFFFF}- Добавлено авто-обновление скрипта по команде, \"/fastlinkupdate\"\n- Добавлена команда, проверяющая наличие обновлений скрипта, \"/fastlinkupdatecheck\"\n- Добавлена команда, которая переносит в группу скрипта во ВКонтакте (самые первые новости об обновленях), \"/fastlinkupdateinfo\"", "{ff0000}Закрыть", nil, DIALOG_STYLE_MSGBOX)
 end
 
 function sampev.onServerMessage(color, msg)
