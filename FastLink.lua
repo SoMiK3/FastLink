@@ -5,22 +5,130 @@ require "lib.moonloader"
 
 script_name("FastLink")
 script_author("СоМиК")
-script_version("1.4")
-local sampev = require "lib.samp.events"
-local keys = require "vkeys"
-local dlstatus = require('moonloader').download_status
-local inicfg = require "inicfg"
+script_version("1.5")
 
 local main_color = 0x5A90CE
 local color_text = "{FFFF00}"
 local tag = "[Fastlink]: "
 
-local script_vers = 2
-local script_vers_text = "1.4"
+local dlstatus = require('moonloader').download_status
+
+local script_vers = 3
+local script_vers_text = "1.5"
 local script_path = thisScript().path
 local script_url = "https://raw.githubusercontent.com/SoMiK3/FastLink/main/FastLink.lua"
-local update_path = getWorkingDirectory() .. "/update.ini"
-local update_url = "https://raw.githubusercontent.com/SoMiK3/FastLink/main/update.ini"
+local update_path = getWorkingDirectory() .. "/flinkupdate.ini"
+local update_url = "https://raw.githubusercontent.com/SoMiK3/FastLink/main/flinkupdate.ini"
+
+local MoonFolder = getWorkingDirectory()
+local MoonLibFolder = MoonFolder .. "\\lib"
+local samplua_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/samp/events.lua"
+local raknet_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/samp/raknet.lua"
+local utils_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/samp/events/utils.lua"
+local handlers_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/samp/events/handlers.lua"
+local extra_types_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/samp/events/extra_types.lua"
+local bitstream_io_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/samp/events/bitstream_io.lua"
+local vector3d_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/vector3d.lua"
+local vkeys_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/vkeys.lua"
+local eventscore_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/samp/events_core.lua"
+local core_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/samp/events/core.lua"
+nalichie = true
+
+if not doesDirectoryExist("moonloader//lib") then
+	createDirectory("moonloader//lib")
+end
+if not doesDirectoryExist("moonloader//lib//samp") then
+	createDirectory("moonloader//lib//samp")
+end
+if not doesDirectoryExist("moonloader//lib//samp//events") then
+	createDirectory("moonloader//lib//samp//events")
+end
+
+if not doesFileExist(MoonLibFolder .."\\samp\\events.lua") then
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"SAMP.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
+	downloadUrlToFile(samplua_url, MoonLibFolder .."\\samp\\events.lua")
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"SAMP.lua\" {FFFF00}успешно установлена!", main_color)
+	nalichie = false
+end
+if not doesFileExist(MoonLibFolder .."\\samp\\raknet.lua") then
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"raknet.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
+	downloadUrlToFile(raknet_url, MoonLibFolder .."\\samp\\raknet.lua")
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"raknet.lua\" {FFFF00}успешно установлена!", main_color)
+	nalichie = false
+end
+if not doesFileExist(MoonLibFolder .."\\samp\\events\\utils.lua") then
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"utils.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
+	downloadUrlToFile(utils_url, MoonLibFolder .."\\samp\\events\\utils.lua")
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"utils.lua\" {FFFF00}успешно установлена!", main_color)
+	nalichie = false
+end
+if not doesFileExist(MoonLibFolder .."\\samp\\events\\handlers.lua") then
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"handlers.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
+	downloadUrlToFile(handlers_url, MoonLibFolder .."\\samp\\events\\handlers.lua")
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"handlers.lua\" {FFFF00}успешно установлена!", main_color)
+	nalichie = false
+end
+if not doesFileExist(MoonLibFolder .."\\samp\\events\\extra_types.lua") then
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"extra_types.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
+	downloadUrlToFile(extra_types_url, MoonLibFolder .."\\samp\\events\\extra_types.lua")
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"extra_types.lua\" {FFFF00}успешно установлена!", main_color)
+	nalichie = false
+end
+if not doesFileExist(MoonLibFolder .."\\samp\\events\\bitstream_io.lua") then
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"bitstream_io.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
+	downloadUrlToFile(bitstream_io_url, MoonLibFolder .."\\samp\\events\\bitstream_io.lua")
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"bitstream_io.lua\" {FFFF00}успешно установлена!", main_color)
+	nalichie = false
+end
+if not doesFileExist(MoonLibFolder .."\\vector3d.lua") then
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"vector3d.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
+	downloadUrlToFile(vector3d_url, MoonLibFolder .."\\vector3d.lua")
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"vector3d.lua\" {FFFF00}успешно установлена!", main_color)
+	nalichie = false
+end
+if not doesFileExist(MoonLibFolder .."\\vkeys.lua") then
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"vkeys.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
+	downloadUrlToFile(vkeys_url, MoonLibFolder .."\\vkeys.lua")
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"vkeys.lua\" {FFFF00}успешно установлена!", main_color)
+	nalichie = false
+end
+if not doesFileExist(MoonLibFolder .."\\samp\\events_core.lua") then
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"events_core.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
+	downloadUrlToFile(eventscore_url, MoonLibFolder .."\\samp\\events_core.lua")
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"events_core.lua\" {FFFF00}успешно установлена!", main_color)
+	nalichie = false
+end
+if not doesFileExist(MoonLibFolder .."\\samp\\events\\core.lua") then
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"core.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
+	downloadUrlToFile(core_url, MoonLibFolder .."\\samp\\events\\core.lua")
+	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"core.lua\" {FFFF00}успешно установлена!", main_color)
+	sampAddChatMessage(tag .. color_text .. "Если скрипт крашнется, необходимо либо {FFFFFF}перезапустить игру{FFFF00}, либо использовать комбинацию {FFFFFF}CTRL {FFFF00}+{FFFFFF} R", main_color)
+	nalichie = false
+	lua_thread.create(function()
+		while true do
+			wait(1000)
+			if not nalichie then
+				thisScript():reload()
+				break
+			end
+		end
+	end)
+else
+	sampAddChatMessage(tag .. color_text .. "Если скрипт крашнется, необходимо либо {FFFFFF}перезапустить игру{FFFF00}, либо использовать комбинацию {FFFFFF}CTRL + R", main_color)
+	lua_thread.create(function()
+		while true do
+			wait(1000)
+			if not nalichie then
+				thisScript():reload()
+				break
+			end
+		end
+	end)
+end
+
+local sampev = require "lib.samp.events"
+local keys = require "vkeys"
+local inicfg = require "inicfg"
 
 function main()
 	if not isSampLoaded() or not isSampfuncsLoaded() then return end
@@ -449,7 +557,13 @@ function updcheck()
 end
 
 function history()
-	sampShowDialog(1337, "{FFFF00}История обновлений скрипта {FFFFFF}FastLink", "{FFFF00}Версия {FFFFFF}1.0{FFFF00}:\n{FFFFFF}- Релиз\n{FFFF00}Версия {FFFFFF}1.1{FFFF00}:\n{FFFFFF}- Теперь если в ссылке нет https:// или http://, скрипт найдет эту ссылку, если у нее будет один из доменов из массива\n{FFFF00}Версия {FFFFFF}1.2{FFFF00}:\n{FFFFFF}- Была добавлена команда, показывающая всю информацию о скрипте, \"/fastlinkinfo\"\n- Была добавлена возможность отключать скрипт (по умолчанию включен), \"/fastlinkwork\"\n{FFFF00}Версия {FFFFFF}1.21{FFFF00}:\n{FFFFFF}- Добавлен домен: .sk (для яндекс диска)\n{FFFF00}Версия {FFFFFF}1.3{FFFF00}:\n{FFFFFF}- Добавлено очень много новых доменов\n{FFFF00}Версия {FFFFFF}1.31{FFFF00}:\n{FFFFFF}- Более точное обнаружение ссылок в чате (доведено до идеала)\n{FFFF00}Версия {FFFFFF}1.4{FFFF00}:\n{FFFFFF}- Добавлено авто-обновление скрипта по команде, \"/fastlinkupdate\"\n- Добавлена команда, проверяющая наличие обновлений скрипта, \"/fastlinkupdatecheck\"\n- Добавлена команда, которая переносит в группу скрипта во ВКонтакте (самые первые новости об обновленях), \"/fastlinkupdateinfo\"\n- Добавлена команда, показывающая историю обновлений скрипта, \"/fastlinkupdatehistory\"", "{ff0000}Закрыть", nil, DIALOG_STYLE_MSGBOX)
+	sampShowDialog(1337, "{FFFF00}История обновлений скрипта {FFFFFF}FastLink", "{FFFF00}Версия {FFFFFF}1.0{FFFF00}:\n{FFFFFF}- Релиз\n{FFFF00}Версия {FFFFFF}1.1{FFFF00}:\n{FFFFFF}- Теперь если в ссылке нет https:// или http://, скрипт найдет эту ссылку, если у нее будет один из доменов из массива\n{FFFF00}Версия {FFFFFF}1.2{FFFF00}:\n{FFFFFF}- Была добавлена команда, показывающая всю информацию о скрипте, \"/fastlinkinfo\"\n- Была добавлена возможность отключать скрипт (по умолчанию включен), \"/fastlinkwork\"\n{FFFF00}Версия {FFFFFF}1.21{FFFF00}:\n{FFFFFF}- Добавлен домен: .sk (для яндекс диска)\n{FFFF00}Версия {FFFFFF}1.3{FFFF00}:\n{FFFFFF}- Добавлено очень много новых доменов\n{FFFF00}Версия {FFFFFF}1.31{FFFF00}:\n{FFFFFF}- Более точное обнаружение ссылок в чате (доведено до идеала)\n{FFFF00}Версия {FFFFFF}1.4{FFFF00}:\n{FFFFFF}- Добавлено авто-обновление скрипта по команде, \"/fastlinkupdate\"\n- Добавлена команда, проверяющая наличие обновлений скрипта, \"/fastlinkupdatecheck\"\n- Добавлена команда, которая переносит в группу скрипта во ВКонтакте (самые первые новости об обновлениях), \"/fastlinkupdateinfo\"\n- Добавлена команда, показывающая историю обновлений скрипта, \"/fastlinkupdatehistory\"\n{FFFF00}Версия {FFFFFF}1.5{FFFF00}:\n{FFFFFF}- Теперь скрипт сам устанавливает все необходимые библиотеки (на данный момент криво, но работает)\n- Теперь при краше скрипта, будет вылезать соответствующее диалоговое окно", "{ff0000}Закрыть", nil, DIALOG_STYLE_MSGBOX)
+end
+
+function onScriptTerminate(script, quitGame)
+    if script == thisScript() then
+        sampShowDialog(1338, "{FFFF00}Краш скрипта {FFFFFF}FastLink", "{FFFF00}Скрипт был {FFFFFF}крашнут {FFFF00}по какой-то причине...\nВозможно, скрипт был {FFFFFF}перезагружен{FFFF00}, это могло посодействовать появлению данного окна\n\nЕсли же скрипт не был перезагружен, пожалуйста, обратитесь сюда: {FFFFFF}https://vk.com/klamet1/\nНе забудьте указать{FFFF00}, каким было ваше последнее действие перед {FFFFFF}крашем{FFFF00} скрипта.\n\n\n{ffff00}И последнее... Никогда не отчаивайтесь и запомните, {FFFFFF}Аллах {FFFF00}вам в помощь.\n{ff0033}ДОЛБИТЕ ВСЕМИ СИЛАМИ ПО КЛАВИШАМ, ПОСТОЯННО ПЕРЕЗАГРУЖАЙТЕ СКРИПТ КОМБИНАЦИЕЙ CTRL + R\nПОСТОЯННО ПЕРЕЗАПУСКАЙТЕ ГТА ЕСЛИ КОМБИНАЦИЯ НЕ СРАБОТАЛА И НАДЕЙТЕСЬ НА УДАЧУ ДО ПОСЛЕДНЕГО, ПОКА СКРИПТ НЕ ЗАРАБОТАЕТ\n{FFFF00}Ну или просто дождитесь {FFFFFF}фикса {FFFF00}от автора :)\nВсем {00FF00}б{FFFF00}обра и позитива, {FFFFFF}чао", "{ff0000}Автор гей", nil, DIALOG_STYLE_MSGBOX)
+    end
 end
 
 function sampev.onServerMessage(color, msg)
