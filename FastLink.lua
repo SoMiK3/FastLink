@@ -5,7 +5,7 @@ require "lib.moonloader"
 
 script_name("FastLink")
 script_author("СоМиК")
-script_version("1.5")
+script_version("1.6")
 
 local main_color = 0x5A90CE
 local color_text = "{FFFF00}"
@@ -13,8 +13,8 @@ local tag = "[Fastlink]: "
 
 local dlstatus = require('moonloader').download_status
 
-local script_vers = 3
-local script_vers_text = "1.5"
+local script_vers = 4
+local script_vers_text = "1.6"
 local script_path = thisScript().path
 local script_url = "https://raw.githubusercontent.com/SoMiK3/FastLink/main/FastLink.lua"
 local update_path = getWorkingDirectory() .. "/flinkupdate.ini"
@@ -45,64 +45,43 @@ if not doesDirectoryExist("moonloader//lib//samp//events") then
 end
 
 if not doesFileExist(MoonLibFolder .."\\samp\\events.lua") then
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"SAMP.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
 	downloadUrlToFile(samplua_url, MoonLibFolder .."\\samp\\events.lua")
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"SAMP.lua\" {FFFF00}успешно установлена!", main_color)
 	nalichie = false
 end
 if not doesFileExist(MoonLibFolder .."\\samp\\raknet.lua") then
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"raknet.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
 	downloadUrlToFile(raknet_url, MoonLibFolder .."\\samp\\raknet.lua")
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"raknet.lua\" {FFFF00}успешно установлена!", main_color)
 	nalichie = false
 end
 if not doesFileExist(MoonLibFolder .."\\samp\\events\\utils.lua") then
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"utils.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
 	downloadUrlToFile(utils_url, MoonLibFolder .."\\samp\\events\\utils.lua")
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"utils.lua\" {FFFF00}успешно установлена!", main_color)
 	nalichie = false
 end
 if not doesFileExist(MoonLibFolder .."\\samp\\events\\handlers.lua") then
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"handlers.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
 	downloadUrlToFile(handlers_url, MoonLibFolder .."\\samp\\events\\handlers.lua")
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"handlers.lua\" {FFFF00}успешно установлена!", main_color)
 	nalichie = false
 end
 if not doesFileExist(MoonLibFolder .."\\samp\\events\\extra_types.lua") then
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"extra_types.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
 	downloadUrlToFile(extra_types_url, MoonLibFolder .."\\samp\\events\\extra_types.lua")
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"extra_types.lua\" {FFFF00}успешно установлена!", main_color)
 	nalichie = false
 end
 if not doesFileExist(MoonLibFolder .."\\samp\\events\\bitstream_io.lua") then
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"bitstream_io.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
 	downloadUrlToFile(bitstream_io_url, MoonLibFolder .."\\samp\\events\\bitstream_io.lua")
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"bitstream_io.lua\" {FFFF00}успешно установлена!", main_color)
 	nalichie = false
 end
 if not doesFileExist(MoonLibFolder .."\\vector3d.lua") then
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"vector3d.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
 	downloadUrlToFile(vector3d_url, MoonLibFolder .."\\vector3d.lua")
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"vector3d.lua\" {FFFF00}успешно установлена!", main_color)
 	nalichie = false
 end
 if not doesFileExist(MoonLibFolder .."\\vkeys.lua") then
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"vkeys.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
 	downloadUrlToFile(vkeys_url, MoonLibFolder .."\\vkeys.lua")
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"vkeys.lua\" {FFFF00}успешно установлена!", main_color)
 	nalichie = false
 end
 if not doesFileExist(MoonLibFolder .."\\samp\\events_core.lua") then
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"events_core.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
 	downloadUrlToFile(eventscore_url, MoonLibFolder .."\\samp\\events_core.lua")
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"events_core.lua\" {FFFF00}успешно установлена!", main_color)
 	nalichie = false
 end
 if not doesFileExist(MoonLibFolder .."\\samp\\events\\core.lua") then
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"core.lua\" {FFFF00}не найдена! Устанавливаю библиотеку...", main_color)
 	downloadUrlToFile(core_url, MoonLibFolder .."\\samp\\events\\core.lua")
-	sampAddChatMessage(tag .. color_text .. "Библиотека {FFFFFF}\"core.lua\" {FFFF00}успешно установлена!", main_color)
-	sampAddChatMessage(tag .. color_text .. "Если скрипт крашнется, необходимо либо {FFFFFF}перезапустить игру{FFFF00}, либо использовать комбинацию {FFFFFF}CTRL {FFFF00}+{FFFFFF} R", main_color)
 	nalichie = false
 	lua_thread.create(function()
 		while true do
@@ -114,7 +93,6 @@ if not doesFileExist(MoonLibFolder .."\\samp\\events\\core.lua") then
 		end
 	end)
 else
-	sampAddChatMessage(tag .. color_text .. "Если скрипт крашнется, необходимо либо {FFFFFF}перезапустить игру{FFFF00}, либо использовать комбинацию {FFFFFF}CTRL + R", main_color)
 	lua_thread.create(function()
 		while true do
 			wait(1000)
@@ -134,13 +112,13 @@ function main()
 	if not isSampLoaded() or not isSampfuncsLoaded() then return end
 	while not isSampAvailable() do wait(100) end
 
-	sampRegisterChatCommand("fastlink", golink)
-	sampRegisterChatCommand("fastlinkwork", work)
-	sampRegisterChatCommand("fastlinkinfo", info)
-	sampRegisterChatCommand("fastlinkupdate", upd)
-	sampRegisterChatCommand("fastlinkupdateinfo", updinfo)
-	sampRegisterChatCommand("fastlinkupdatecheck", updcheck)
-	sampRegisterChatCommand("fastlinkupdatehistory", history)
+	sampRegisterChatCommand("flink", golink)
+	sampRegisterChatCommand("flinkwork", work)
+	sampRegisterChatCommand("flinkinfo", info)
+	sampRegisterChatCommand("fastlinkupd", upd)
+	sampRegisterChatCommand("flinkupdinfo", updinfo)
+	sampRegisterChatCommand("flinkupdcheck", updcheck)
+	sampRegisterChatCommand("flinkupdhistory", history)
 
 	work = true
 	abobus = false
@@ -421,7 +399,7 @@ function main()
 'amazon'
 }
 
-	sampAddChatMessage(tag .. color_text .. "Скрипт готов к работе. Автор - " .. "{FFFFFF}" ..  "СоМиК" .. color_text .. "! Информация: " .. "{FFFFFF}" .. "/fastlinkinfo", main_color)
+	sampAddChatMessage(tag .. color_text .. "Скрипт готов к работе. Автор - " .. "{FFFFFF}" ..  "СоМиК" .. color_text .. "! Информация: " .. "{FFFFFF}" .. "/flinkinfo", main_color)
 	sampAddChatMessage(tag .. color_text .. "Полезный скрипт для фарма виртов на {FFFFFF}ARZ RP(G) {FFFF00}от этого же автора: {FFFFFF}https://www.blast.hk/threads/98245/", main_color)
 	sampAddChatMessage(tag .. color_text .. "Для перехода по ссылке {FFFFFF}https://www.blast.hk/threads/98245/{FFFF00} нажмите {FFFFFF}F3", main_color)
 
@@ -431,13 +409,13 @@ function main()
 			updateIni = inicfg.load(nil, update_path)
 			if tonumber(updateIni.info.vers) > script_vers then
 				sampAddChatMessage(tag .. color_text .. "Есть {FFFFFF}обновление{FFFF00}! Новая версия: {FFFFFF}" .. updateIni.info.vers_text .."{FFFF00}. Текущая версия: {FFFFFF}".. script_vers_text .. "{FFFF00}.", main_color)
-				sampAddChatMessage(tag .. color_text .. "Узнать изменения можно в группе скрипта во {FFFFFF}ВКонтакте{FFFF00}. Команда для перехода: {FFFFFF}/fastlinkupdateinfo", main_color)
-				sampAddChatMessage(tag .. color_text .. "Чтобы {FFFFFF}установить{FFFF00} обновление, необходимо ввести {FFFFFF}/fastlinkupdate", main_color)
+				sampAddChatMessage(tag .. color_text .. "Узнать изменения можно в группе скрипта во {FFFFFF}ВКонтакте{FFFF00}. Команда для перехода: {FFFFFF}/flinkupdinfo", main_color)
+				sampAddChatMessage(tag .. color_text .. "Чтобы {FFFFFF}установить{FFFF00} обновление, необходимо ввести {FFFFFF}/flinkupd", main_color)
 				mbobnova = true
 				checkupd = false
 			else
 				checkupd = false
-				sampAddChatMessage(tag .. color_text .. "Обновлений {FFFFFF}не найдено{FFFF00}. Проверить наличие обновлений повторно можно введя {FFFFFF}/fastlinkupdatecheck", main_color)
+				sampAddChatMessage(tag .. color_text .. "Обновлений {FFFFFF}не найдено{FFFF00}. Проверить наличие обновлений повторно можно введя {FFFFFF}/flinkupdcheck", main_color)
 			end
 			os.remove(update_path)
 			checkupd = false
@@ -462,7 +440,7 @@ function main()
 			downloadUrlToFile(script_url, script_path, function(id, status)
 				if status == dlstatus.STATUS_ENDDOWNLOADDATA then
 					sampAddChatMessage(tag .. color_text .. "Обновление {FFFFFF}успешно{FFFF00} установлено. Новая версия: {FFFFFF}" .. updateIni.info.vers_text, main_color)
-					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Узнать{FFFF00} историю обновлений можно, введя {FFFFFF}/fastlinkupdatehistory", main_color)
+					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Узнать{FFFF00} историю обновлений можно, введя {FFFFFF}/flinkupdhistory", main_color)
 				end
 			end)
 			break
@@ -479,7 +457,7 @@ function golink()
 			sampAddChatMessage(tag .. color_text .. "Ссылка {FFFFFF}не найдена{FFFF00}. Дождитесь, пока в чате появится хотя бы одна ссылка.", main_color)
 		end
 	else
-		sampAddChatMessage(tag .. color_text .. "Скрипт был {FFFFFF}отключён{FFFF00}. Для включения надо ввести команду {FFFFFF}/fastlinkwork", main_color)
+		sampAddChatMessage(tag .. color_text .. "Скрипт был {FFFFFF}отключён{FFFF00}. Для включения надо ввести команду {FFFFFF}/flinkwork", main_color)
 	end
 end
 
@@ -511,9 +489,9 @@ function info()
 	sampAddChatMessage(tag .. "{FFFFFF}." .. table.concat(l,", .", 209, 229), main_color)
 	sampAddChatMessage(tag .. "{FFFFFF}." .. table.concat(l,", .", 230, 250), main_color)
 	sampAddChatMessage(tag .. "{FFFFFF}." .. table.concat(l,", .", 251, 269), main_color)
-	sampAddChatMessage(tag .. color_text .. "Чтобы скрипт прекратил/начал отлавливать ссылки в чате (по умолчанию вкл), достаточно ввести команду: {FFFFFF}/fastlinkwork", main_color)
-	sampAddChatMessage(tag .. color_text .. "Чтобы проверить наличие {FFFFFF}обновлений{FFFF00} скрипта, достаточно ввести {FFFFFF}/fastlinkupdatecheck", main_color)
-	sampAddChatMessage(tag .. color_text .. "Чтобы открыть историю {FFFFFF}обновлений{FFFF00} скрипта, достаточно ввести {FFFFFF}/fastlinkupdatehistory", main_color)
+	sampAddChatMessage(tag .. color_text .. "Чтобы скрипт прекратил/начал отлавливать ссылки в чате (по умолчанию вкл), достаточно ввести команду: {FFFFFF}/flinkwork", main_color)
+	sampAddChatMessage(tag .. color_text .. "Чтобы проверить наличие {FFFFFF}обновлений{FFFF00} скрипта, достаточно ввести {FFFFFF}/flinkupdcheck", main_color)
+	sampAddChatMessage(tag .. color_text .. "Чтобы открыть историю {FFFFFF}обновлений{FFFF00} скрипта, достаточно ввести {FFFFFF}/flinkupdhistory", main_color)
 end
 
 function updinfo()
@@ -526,7 +504,7 @@ function upd()
 		sampAddChatMessage(tag .. color_text .. "Начинаю {FFFFFF}устанавливать {FFFF00}найденное обновление", main_color)
 		obnova = true
 	else
-		sampAddChatMessage(tag .. color_text .. "Обновлений {FFFFFF}не найдено{FFFF00}. Проверить наличие обновлений повторно можно введя {FFFFFF}/fastlinkupdatecheck", main_color)
+		sampAddChatMessage(tag .. color_text .. "Обновлений {FFFFFF}не найдено{FFFF00}. Проверить наличие обновлений повторно можно введя {FFFFFF}/flinkupdcheck", main_color)
 	end
 end
 
@@ -539,13 +517,13 @@ function updcheck()
 				updateIni = inicfg.load(nil, update_path)
 				if tonumber(updateIni.info.vers) > script_vers then
 					sampAddChatMessage(tag .. color_text .. "Есть {FFFFFF}обновление{FFFF00}! Новая версия: {FFFFFF}" .. updateIni.info.vers_text .. "{FFFF00}. Текущая версия: {FFF-FFF}".. script_vers_text .. "{FFFF00}.", main_color)
-					sampAddChatMessage(tag .. color_text .. "Узнать изменения можно в группе скрипта во {FFFFFF}ВКонтакте{FFFF00}. Команда для перехода: {FFFFFF}/fastlinkupdateinfo", main_color)
-					sampAddChatMessage(tag .. color_text .. "Чтобы {FFFFFF}установить{FFFF00} обновление, необходимо ввести {FFFFFF}/fastlinkupdate", main_color)
+					sampAddChatMessage(tag .. color_text .. "Узнать изменения можно в группе скрипта во {FFFFFF}ВКонтакте{FFFF00}. Команда для перехода: {FFFFFF}/flinkupdinfo", main_color)
+					sampAddChatMessage(tag .. color_text .. "Чтобы {FFFFFF}установить{FFFF00} обновление, необходимо ввести {FFFFFF}/flinkupd", main_color)
 					mbobnova = true
 					checkupd = false
 				else
 					checkupd = false
-					sampAddChatMessage(tag .. color_text .. "Обновлений {FFFFFF}не найдено{FFFF00}. Проверить наличие обновлений повторно можно введя {FFFFFF}/fastlinkupdatecheck", main_color)
+					sampAddChatMessage(tag .. color_text .. "Обновлений {FFFFFF}не найдено{FFFF00}. Проверить наличие обновлений повторно можно введя {FFFFFF}/flinkupdcheck", main_color)
 				end
 				os.remove(update_path)
 				checkupd = false
@@ -557,7 +535,7 @@ function updcheck()
 end
 
 function history()
-	sampShowDialog(1337, "{FFFF00}История обновлений скрипта {FFFFFF}FastLink", "{FFFF00}Версия {FFFFFF}1.0{FFFF00}:\n{FFFFFF}- Релиз\n{FFFF00}Версия {FFFFFF}1.1{FFFF00}:\n{FFFFFF}- Теперь если в ссылке нет https:// или http://, скрипт найдет эту ссылку, если у нее будет один из доменов из массива\n{FFFF00}Версия {FFFFFF}1.2{FFFF00}:\n{FFFFFF}- Была добавлена команда, показывающая всю информацию о скрипте, \"/fastlinkinfo\"\n- Была добавлена возможность отключать скрипт (по умолчанию включен), \"/fastlinkwork\"\n{FFFF00}Версия {FFFFFF}1.21{FFFF00}:\n{FFFFFF}- Добавлен домен: .sk (для яндекс диска)\n{FFFF00}Версия {FFFFFF}1.3{FFFF00}:\n{FFFFFF}- Добавлено очень много новых доменов\n{FFFF00}Версия {FFFFFF}1.31{FFFF00}:\n{FFFFFF}- Более точное обнаружение ссылок в чате (доведено до идеала)\n{FFFF00}Версия {FFFFFF}1.4{FFFF00}:\n{FFFFFF}- Добавлено авто-обновление скрипта по команде, \"/fastlinkupdate\"\n- Добавлена команда, проверяющая наличие обновлений скрипта, \"/fastlinkupdatecheck\"\n- Добавлена команда, которая переносит в группу скрипта во ВКонтакте (самые первые новости об обновлениях), \"/fastlinkupdateinfo\"\n- Добавлена команда, показывающая историю обновлений скрипта, \"/fastlinkupdatehistory\"\n{FFFF00}Версия {FFFFFF}1.5{FFFF00}:\n{FFFFFF}- Теперь скрипт сам устанавливает все необходимые библиотеки (на данный момент криво, но работает)\n- Теперь при краше скрипта, будет вылезать соответствующее диалоговое окно", "{ff0000}Закрыть", nil, DIALOG_STYLE_MSGBOX)
+	sampShowDialog(1337, "{FFFF00}История обновлений скрипта {FFFFFF}FastLink", "{FFFF00}Версия {FFFFFF}1.0{FFFF00}:\n{FFFFFF}- Релиз\n{FFFF00}Версия {FFFFFF}1.1{FFFF00}:\n{FFFFFF}- Теперь если в ссылке нет https:// или http://, скрипт найдет эту ссылку, если у нее будет один из доменов из массива\n{FFFF00}Версия {FFFFFF}1.2{FFFF00}:\n{FFFFFF}- Была добавлена команда, показывающая всю информацию о скрипте, \"/flinkinfo\"\n- Была добавлена возможность отключать скрипт (по умолчанию включен), \"/flinkwork\"\n{FFFF00}Версия {FFFFFF}1.21{FFFF00}:\n{FFFFFF}- Добавлен домен: .sk (для яндекс диска)\n{FFFF00}Версия {FFFFFF}1.3{FFFF00}:\n{FFFFFF}- Добавлено очень много новых доменов\n{FFFF00}Версия {FFFFFF}1.31{FFFF00}:\n{FFFFFF}- Более точное обнаружение ссылок в чате (доведено до идеала)\n{FFFF00}Версия {FFFFFF}1.4{FFFF00}:\n{FFFFFF}- Добавлено авто-обновление скрипта по команде, \"/flinkupd\"\n- Добавлена команда, проверяющая наличие обновлений скрипта, \"/flinkupdcheck\"\n- Добавлена команда, которая переносит в группу скрипта во ВКонтакте (самые первые новости об обновлениях), \"/flinkupdinfo\"\n- Добавлена команда, показывающая историю обновлений скрипта, \"/flinkupdhistory\"\n{FFFF00}Версия {FFFFFF}1.5{FFFF00}:\n{FFFFFF}- Теперь скрипт сам устанавливает все необходимые библиотеки (на данный момент криво, но работает)\n- Теперь при краше скрипта, будет вылезать соответствующее диалоговое окно\n{FFFF00}Версия {FFFFFF}1.6{FFFF00}:\n{FFFFFF}- {FFFFFF}Исправлена {FFFF00}проблема, когда скрипт крашил при запуске {FFFFFF}ГТА{FFFF00}\n{FFFFFF}- Команды были {FFFFFF}урезаны{FFFF00}:\n     {FFFFFF}/fastlink - /flink\n     /fastlinkwork - /flinkwork\n     /fastlinkupdate - /flinkupd\n     /fastlinkupdatecheck - /flinkupdcheck\n     /fastlinkupdateinfo - /flinkupdinfo\n     /fastlinkupdatehistory - /flinkupdhistory", "{ff0000}Закрыть", nil, DIALOG_STYLE_MSGBOX)
 end
 
 function onScriptTerminate(script, quitGame)
@@ -573,7 +551,7 @@ function sampev.onServerMessage(color, msg)
 			ssilka = "https://" .. ssilka
 			abobus = true
 			naideno = true
-			sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/fastlink", main_color)
+			sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
 			sampAddChatMessage(tag .. color_text .. "Ссылка: {FFFFFF}" .. ssilka, main_color)
 		end
 		if msg:find("http://(%S+)") then
@@ -581,7 +559,7 @@ function sampev.onServerMessage(color, msg)
 			ssilka = "http://" .. ssilka
 			abobus = true
 			naideno = true
-			sampAddChatMessage(tag..color_text.."В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/fastlink", main_color)
+			sampAddChatMessage(tag..color_text.."В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
 			sampAddChatMessage(tag .. color_text .. "Ссылка: {FFFFFF}" .. ssilka, main_color)
 		end
 		if not naideno then
@@ -594,7 +572,7 @@ function sampev.onServerMessage(color, msg)
 						ssilka = "www." .. ssilka .. "." .. v .. "/" .. two_ssilka
 					end
 					abobus = true
-					sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/fastlink", main_color)
+					sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
 					sampAddChatMessage(tag .. color_text .. "Ссылка: {FFFFFF}" .. ssilka, main_color)
 				elseif msg:match("(%S+)%." .. v .. "/") and not naideno then
 					ssilka = msg:match("(%S+)%." .. v .. "/")
@@ -604,7 +582,7 @@ function sampev.onServerMessage(color, msg)
 						ssilka = "www." .. ssilka .. "." .. v .. "/"
 					end
 					abobus = true
-					sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/fastlink", main_color)
+					sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
 					sampAddChatMessage(tag .. color_text .. "Ссылка: {FFFFFF}" .. ssilka, main_color)
 				elseif msg:match("(%S+)%." .. v) and not naideno then
 					if msg:match("(%S+)%." .. v) then
@@ -616,7 +594,7 @@ function sampev.onServerMessage(color, msg)
 								ssilka = "www." .. ssilka .. "." .. v
 							end
 							abobus = true
-							sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/fastlink", main_color)
+							sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
 							sampAddChatMessage(tag .. color_text .. "Ссылка: {FFFFFF}" .. ssilka, main_color)
 						end
 					end
