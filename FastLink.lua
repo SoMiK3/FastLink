@@ -13,8 +13,8 @@ local tag = "[Fastlink]: "
 
 local dlstatus = require('moonloader').download_status
 
-local script_vers = 3
-local script_vers_text = "1.5"
+local script_vers = 4
+local script_vers_text = "1.6"
 local script_path = thisScript().path
 local script_url = "https://raw.githubusercontent.com/SoMiK3/FastLink/main/FastLink.lua"
 local update_path = getWorkingDirectory() .. "/flinkupdate.ini"
@@ -115,7 +115,7 @@ function main()
 	sampRegisterChatCommand("flink", golink)
 	sampRegisterChatCommand("flinkwork", work)
 	sampRegisterChatCommand("flinkinfo", info)
-	sampRegisterChatCommand("fastlinkupd", upd)
+	sampRegisterChatCommand("flinkupd", upd)
 	sampRegisterChatCommand("flinkupdinfo", updinfo)
 	sampRegisterChatCommand("flinkupdcheck", updcheck)
 	sampRegisterChatCommand("flinkupdhistory", history)
