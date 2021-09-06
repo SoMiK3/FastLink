@@ -5,7 +5,7 @@ require "lib.moonloader"
 
 script_name("FastLink")
 script_author("СоМиК")
-script_version("2.0")
+script_version("1.6")
 
 local main_color = 0x5A90CE
 local color_text = "{FFFF00}"
@@ -13,8 +13,8 @@ local tag = "[Fastlink]: "
 
 local dlstatus = require('moonloader').download_status
 
-local script_vers = 5
-local script_vers_text = "2.0"
+local script_vers = 4
+local script_vers_text = "1.6"
 local script_path = thisScript().path
 local script_url = "https://raw.githubusercontent.com/SoMiK3/FastLink/main/FastLink.lua"
 local update_path = getWorkingDirectory() .. "/flinkupdate.ini"
@@ -736,7 +736,7 @@ function apply_custom_style()
     style.WindowRounding = 16.0
     style.ChildWindowRounding = 6.0
     style.FramePadding = imgui.ImVec2(4.0, 3.0)
-    style.FrameRounding = 0
+    style.FrameRounding = 12.0
     style.ItemSpacing = imgui.ImVec2(12.0, 6.5)
     style.ItemInnerSpacing = imgui.ImVec2(4.0, 4.0)
     style.TouchExtraPadding = imgui.ImVec2(0, 0)
@@ -746,7 +746,7 @@ function apply_custom_style()
     style.GrabMinSize = 20.0
     style.GrabRounding = 16.0
     style.WindowTitleAlign = imgui.ImVec2(0.5, 0.5)
-    style.ButtonTextAlign = imgui.ImVec2(0.5, 0.5)
+    style.ButtonTextAlign = imgui.ImVec2(0.9, 0.9)
 
 	colors[clr.Text]                   = ImVec4(0.00, 0.00, 0.00, 1.00)
 	colors[clr.TextDisabled]           = ImVec4(0.30, 0.30, 0.30, 1.00)
@@ -882,12 +882,12 @@ function imgui.OnDrawFrame()
 				ssilka = ssilka:gsub('{......}', '')
 				imgui.TextColoredRGB("{003399}Ссылка {000000}\"{355e3b}" .. ssilka .. "{000000}\"{003399}, была получена в {9400d3}" .. time1 .. " {003399}|")
 				imgui.SameLine()
-				if imgui.CustomButton(u8"перейти", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00)) then
+				if imgui.CustomButton(u8"   перейти   ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00)) then
 					os.execute("start " .. ssilka)
 					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Переходим {FFFF00}по ссылке...", main_color)
 				end
 				imgui.SameLine()
-				if imgui.CustomButton(u8"скопировать", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00)) then
+				if imgui.CustomButton(u8"   скопировать   ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00)) then
 					setClipboardText(ssilka)
 					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Скопировано {FFFF00}в буффер обмена", main_color)
 				end
@@ -898,12 +898,12 @@ function imgui.OnDrawFrame()
 				ssilka2 = ssilka2:gsub('{......}', '')
 				imgui.TextColoredRGB("{003399}Ссылка {000000}\"{355e3b}" .. ssilka2 .. "{000000}\"{003399}, была получена в {9400d3}" .. time2 .. " {003399}|")
 				imgui.SameLine()
-				if imgui.CustomButton(u8"перейти ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00)) then
+				if imgui.CustomButton(u8"   перейти    ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00)) then
 					os.execute("start " .. ssilka2)
 					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Переходим {FFFF00}по ссылке...", main_color)
 				end
 				imgui.SameLine()
-				if imgui.CustomButton(u8"скопировать ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00)) then
+				if imgui.CustomButton(u8"   скопировать    ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00)) then
 					setClipboardText(ssilka2)
 					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Скопировано {FFFF00}в буффер обмена", main_color)
 				end
@@ -914,12 +914,12 @@ function imgui.OnDrawFrame()
 				ssilka3 = ssilka3:gsub('{......}', '')
 				imgui.TextColoredRGB("{003399}Ссылка {000000}\"{355e3b}" .. ssilka3 .. "{000000}\"{003399}, была получена в {9400d3}" .. time3 .. " {003399}|")
 				imgui.SameLine()
-				if imgui.CustomButton(u8"перейти  ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00))  then
+				if imgui.CustomButton(u8"   перейти     ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00))  then
 					os.execute("start " .. ssilka3)
 					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Переходим {FFFF00}по ссылке...", main_color)
 				end
 				imgui.SameLine()
-				if imgui.CustomButton(u8"скопировать  ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00)) then
+				if imgui.CustomButton(u8"   скопировать     ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00)) then
 					setClipboardText(ssilka3)
 					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Скопировано {FFFF00}в буффер обмена", main_color)
 				end
@@ -927,36 +927,38 @@ function imgui.OnDrawFrame()
 		end
 		if ssilka == nil and ssilka2 == nil and ssilka3 == nil then
 			imgui.PushFont(fontsize25)
-				imgui.TextColoredRGB("{FF0000} Ссылок в чате обнаружено не было!")
+				imgui.TextColoredRGB("{FF0000}В чате не было найдено ни одной ссылки!")
 			imgui.PopFont()
 		end
 		imgui.EndChild()
 		imgui.Separator()
 		if work then
 			imgui.PushFont(fontsize18)
-				if imgui.CustomButton(u8"отключить поиск ссылок в чате", imgui.ImVec4(1.00, 0.00, 0.00, 0.79), imgui.ImVec4(0.67, 0.40, 0.40, 1.00), imgui.ImVec4(1.00, 0.00, 0.00, 1.00)) then
+				if imgui.CustomButton(u8"   отключить поиск ссылок в чате   ", imgui.ImVec4(1.00, 0.00, 0.00, 0.79), imgui.ImVec4(0.67, 0.40, 0.40, 1.00), imgui.ImVec4(1.00, 0.00, 0.00, 1.00)) then
 					work = false
 				end
 			imgui.PopFont()
 		else
 			imgui.PushFont(fontsize18)
-				if imgui.CustomButton(u8"включить поиск ссылок в чате", imgui.ImVec4(0.00, 1.00, 0.20, 0.60), imgui.ImVec4(0.01, 0.51, 0.04, 1.00), imgui.ImVec4(0.12, 1.00, 0.00, 1.00), imgui.ImVec2(250, 25)) then
+				if imgui.CustomButton(u8"   включить поиск ссылок в чате   ", imgui.ImVec4(0.00, 1.00, 0.20, 0.60), imgui.ImVec4(0.01, 0.51, 0.04, 1.00), imgui.ImVec4(0.12, 1.00, 0.00, 1.00)) then
 					work = true
 				end
 			imgui.PopFont()
 		end
 		imgui.SameLine()
 		imgui.PushFont(fontsize18)
-			if imgui.CustomButton(u8"проверить наличие обновлений", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00))  then
+			if imgui.CustomButton(u8"   проверить наличие обновлений   ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00))  then
 				updcheck()
 			end
 		imgui.PopFont()
 		imgui.SameLine()
 		imgui.PushFont(fontsize18)
-			if imgui.CustomButton(u8"обновить", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00))  then
+			if imgui.CustomButton(u8"   обновить   ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00))  then
 				upd()
 			end
 		imgui.PopFont()
 		imgui.End()
 	end
 end
+
+-- - В скрипт было добавлено новое ImGui (Immediate Mode Graphic user interface) окно, в котором можно выключить скрипт, а также перейти либо скопировать три последние найденные ссылки, "/flinkmn"
