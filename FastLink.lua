@@ -616,6 +616,7 @@ function sampev.onServerMessage(color, msg)
 			end
 			ssilka = msg:match("https://(%S+)")
 			ssilka = "https://" .. ssilka
+			ssilka = ssilka:gsub('{......}', '')
 			time1 = os.date("%X")
 			abobus = true
 			naideno = true
@@ -637,6 +638,7 @@ function sampev.onServerMessage(color, msg)
 			end
 			ssilka = msg:match("http://(%S+)")
 			ssilka = "http://" .. ssilka
+			ssilka = ssilka:gsub('{......}', '')
 			time1 = os.date("%X")
 			abobus = true
 			naideno = true
@@ -662,8 +664,10 @@ function sampev.onServerMessage(color, msg)
 					ssilka, two_ssilka = msg:match("(%S+)%." .. v .. "/(%S+)")
 					if msg:match("www.%S+%." .. v .. "/%S+") then
 						ssilka = ssilka .. "." .. v .. "/" .. two_ssilka
+						ssilka = ssilka:gsub('{......}', '')
 					else
 						ssilka = "www." .. ssilka .. "." .. v .. "/" .. two_ssilka
+						ssilka = ssilka:gsub('{......}', '')
 					end
 					abobus = true
 					sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
@@ -685,8 +689,10 @@ function sampev.onServerMessage(color, msg)
 					ssilka = msg:match("(%S+)%." .. v .. "/")
 					if msg:match("www.%S+%." .. v .. "/") then
 						ssilka =  ssilka .. "." .. v .. "/"
+						ssilka = ssilka:gsub('{......}', '')
 					else
 						ssilka = "www." .. ssilka .. "." .. v .. "/"
+						ssilka = ssilka:gsub('{......}', '')
 					end
 					abobus = true
 					sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
@@ -710,8 +716,10 @@ function sampev.onServerMessage(color, msg)
 							ssilka = msg:match("(%S+)%." .. v)
 							if msg:match("www.%S+%." .. v) then
 								ssilka = ssilka .. "." .. v
+								ssilka = ssilka:gsub('{......}', '')
 							else
 								ssilka = "www." .. ssilka .. "." .. v
+								ssilka = ssilka:gsub('{......}', '')
 							end
 							abobus = true
 							sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
@@ -960,4 +968,3 @@ function imgui.OnDrawFrame()
 		imgui.End()
 	end
 end
-
