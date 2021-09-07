@@ -5,7 +5,8 @@ require "lib.moonloader"
 
 script_name("FastLink")
 script_author("СоМиК")
-script_version("2.0")
+script_version("2.1")
+script_properties("work-in-pause")
 
 local main_color = 0x5A90CE
 local color_text = "{FFFF00}"
@@ -13,8 +14,8 @@ local tag = "[Fastlink]: "
 
 local dlstatus = require('moonloader').download_status
 
-local script_vers = 5
-local script_vers_text = "2.0"
+local script_vers = 6
+local script_vers_text = "2.1"
 local script_path = thisScript().path
 local script_url = "https://raw.githubusercontent.com/SoMiK3/FastLink/main/FastLink.lua"
 local update_path = getWorkingDirectory() .. "/flinkupdate.ini"
@@ -22,18 +23,16 @@ local update_url = "https://raw.githubusercontent.com/SoMiK3/FastLink/main/flink
 
 local MoonFolder = getWorkingDirectory()
 local MoonLibFolder = MoonFolder .. "\\lib"
-local samplua_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/samp/events.lua"
-local raknet_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/samp/raknet.lua"
-local utils_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/samp/events/utils.lua"
-local handlers_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/samp/events/handlers.lua"
-local extra_types_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/samp/events/extra_types.lua"
-local bitstream_io_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/samp/events/bitstream_io.lua"
-local vector3d_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/vector3d.lua"
-local vkeys_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/vkeys.lua"
-local eventscore_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/samp/events_core.lua"
-local core_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/samp/events/core.lua"
+local samplua_url = "https://raw.githubusercontent.com/THE-FYP/SAMP.Lua/master/samp/events.lua"
+local raknet_url = "https://raw.githubusercontent.com/THE-FYP/SAMP.Lua/master/samp/raknet.lua"
+local utils_url = "https://raw.githubusercontent.com/THE-FYP/SAMP.Lua/master/samp/events/utils.lua"
+local handlers_url = "https://raw.githubusercontent.com/THE-FYP/SAMP.Lua/master/samp/events/handlers.lua"
+local extra_types_url = "https://raw.githubusercontent.com/THE-FYP/SAMP.Lua/master/samp/events/extra_types.lua"
+local bitstream_io_url = "https://raw.githubusercontent.com/THE-FYP/SAMP.Lua/master/samp/events/bitstream_io.lua"
+local core_url = "https://raw.githubusercontent.com/THE-FYP/SAMP.Lua/master/samp/events/core.lua"
 local imgui_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/imgui.lua"
 local imguidll_url = "https://github.com/SoMiK3/FastLinkLibs/blob/main/MoonImGui.dll?raw=true"
+-- ДЛЯ МОДЕРАТОРОВ BLASTHACK. МНЕ СКАЗАЛИ, ЧТО ССЫЛКУ НА ИМГУИ МОЖНО НЕ МЕНЯТЬ, ТАК КАК ИМГУИ ОБНОВЛЯТЬСЯ НЕ БУДЕТ. НЕ НАДО ИЗ-ЗА ЭТОГО ОТПРАВЛЯТЬ ФАЙЛ НА ПОВТОРНУЮ ПРЕМОДЕРАЦИЮ, МОГУ ПОКАЗАТЬ ЧТО МНЕ ОТВЕТИЛ ВСЕФОРУМ.
 nalichie = true
 
 if not doesDirectoryExist("moonloader//lib") then
@@ -68,18 +67,6 @@ if not doesFileExist(MoonLibFolder .."\\samp\\events\\extra_types.lua") then
 end
 if not doesFileExist(MoonLibFolder .."\\samp\\events\\bitstream_io.lua") then
 	downloadUrlToFile(bitstream_io_url, MoonLibFolder .."\\samp\\events\\bitstream_io.lua")
-	nalichie = false
-end
-if not doesFileExist(MoonLibFolder .."\\vector3d.lua") then
-	downloadUrlToFile(vector3d_url, MoonLibFolder .."\\vector3d.lua")
-	nalichie = false
-end
-if not doesFileExist(MoonLibFolder .."\\vkeys.lua") then
-	downloadUrlToFile(vkeys_url, MoonLibFolder .."\\vkeys.lua")
-	nalichie = false
-end
-if not doesFileExist(MoonLibFolder .."\\samp\\events_core.lua") then
-	downloadUrlToFile(eventscore_url, MoonLibFolder .."\\samp\\events_core.lua")
 	nalichie = false
 end
 if not doesFileExist(MoonLibFolder .."\\samp\\events\\core.lua") then
@@ -121,31 +108,40 @@ local sw, sh = getScreenResolution()
 local initable = {
 cfg = {
 	posx = 0,
-	posy = sh / 2
+	posy = sh / 2,
+	cchat = true,
+	cimgui = false,
+	numberint = 1
 	}
 }
 local flinke
+if not doesDirectoryExist("moonloader//lib") then
+	createDirectory("moonloader//lib")
+	inicfg.save(initable, "flinke")
+end
+flinke = inicfg.load(nil, "flinke")
+if flinke == nil then
+	inicfg.save(initable, "flinke")
+	flinke = inicfg.load(nil, "flinke")
+end
+if flinke.cfg.cchat then
+	numberint = 1
+elseif flinke.cfg.cimgui then
+	numberint = 2
+end
 local imgui = require "imgui"
 local encoding = require "encoding"
 encoding.default = "CP1251"
 u8 = encoding.UTF8
 
 local main_window = imgui.ImBool(false)
+local two_window = imgui.ImBool(false)
 local text_buffer = imgui.ImBuffer(256)
+local radio = imgui.ImInt(numberint)
 
 function main()
 	if not isSampLoaded() or not isSampfuncsLoaded() then return end
 	while not isSampAvailable() do wait(100) end
-
-	if not doesDirectoryExist("moonloader//lib") then
-		createDirectory("moonloader//lib")
-		inicfg.save(initable, "flinke")
-	end
-	flinke = inicfg.load(nil, "flinke")
-	if flinke == nil then
-		inicfg.save(initable, "flinke")
-		flinke = inicfg.load(nil, "flinke")
-	end
 
 	sampRegisterChatCommand("flink", golink)
 	sampRegisterChatCommand("flinkwork", work)
@@ -436,6 +432,9 @@ function main()
 'amazon'
 }
 
+		ln = {
+}
+
 	sampAddChatMessage(tag .. color_text .. "Скрипт готов к работе. Автор - " .. "{FFFFFF}" ..  "СоМиК" .. color_text .. "! Информация: " .. "{FFFFFF}" .. "/flinkinfo", main_color)
 	sampAddChatMessage(tag .. color_text .. "Полезный скрипт для фарма виртов на {FFFFFF}ARZ RP(G) {FFFF00}от этого же автора: {FFFFFF}https://www.blast.hk/threads/98245/", main_color)
 	sampAddChatMessage(tag .. color_text .. "Для перехода по ссылке {FFFFFF}https://www.blast.hk/threads/98245/{FFFF00} нажмите {FFFFFF}F3", main_color)
@@ -459,13 +458,20 @@ function main()
 		end
 	end)
 
-	if not doesDirectoryExist("moonloader//lib") then
-		createDirectory("moonloader//lib")
-		inicfg.save(initable, "flinke")
-	end
-	if flinke == nil then
-		flinke = inicfg.load(nil, "flinke")
-	end
+	lua_thread.create(function()
+		while true do
+			wait(0)
+			if #ln > 0 then
+				vivodssilka = ln[1]
+				mojnavivod = true
+				two_window.v = true
+				wait(5000)
+				table.remove(ln, 1)
+				mojnavivod = false
+				newssilka = false
+			end
+		end
+	end)
 
 	while true do
 	wait(0)
@@ -473,13 +479,19 @@ function main()
 			if abobus then
 				sampAddChatMessage(tag .. color_text .. "{FFFFFF}Переходим {FFFF00}по последней найденной ссылке...", main_color)
 				os.execute("start " .. ssilka)
+			elseif changepos then
+				sampAddChatMessage(tag .. color_text .. "Сейчас {FFFFFF}недоступно[FFFF00}.", main_color)
 			else
 				sampAddChatMessage(tag .. color_text .. "Ссылка {FFFFFF}не найдена{FFFF00}. Дождитесь, пока в чате появится хотя бы одна ссылка.", main_color)
 			end
 		end
 		if isKeyJustPressed(0x72) and not isPauseMenuActive() and work == true then
-			sampAddChatMessage(tag .. color_text .. "{FFFFFF}Переходим {FFFF00}по ссылке...", main_color)
-			os.execute("start https://www.blast.hk/threads/98245/")
+			if changepos then
+				sampAddChatMessage(tag .. color_text .. "Сейчас {FFFFFF}недоступно[FFFF00}.", main_color)
+			else
+				sampAddChatMessage(tag .. color_text .. "{FFFFFF}Переходим {FFFF00}по ссылке...", main_color)
+				os.execute("start https://www.blast.hk/threads/98245/")
+			end
 		end
 		if obnova then
 			downloadUrlToFile(script_url, script_path, function(id, status)
@@ -489,6 +501,16 @@ function main()
 				end
 			end)
 			break
+		end
+		if changepos or main_window.v then
+			imgui.ShowCursor = true
+		else
+			imgui.ShowCursor = false
+		end
+		if main_window.v or two_window.v then
+			imgui.Process = true
+		else
+			imgui.Process = true
 		end
 	end
 end
@@ -582,13 +604,94 @@ function updcheck()
 	end
 end
 
+function fcp()
+	if main_window.v then
+		main_window.v = false
+		posx, posy = getCursorPos()
+		changepos = true
+		two_window.v = true
+		sampAddChatMessage(tag .. color_text .. "Окно гуляет за курсором!", main_color)
+		sampAddChatMessage(tag .. color_text .. "Клавиша {FFFFFF}ENTER{FFFF00} назначает окну новое место. Клавиша {FFFFFF}ESC{FFFF00} возвращает окно на прежнее место", main_color)
+		lua_thread.create(function ()
+			while true do
+				wait(0)
+				if changepos then
+					showCursor(true, true)
+					posx, posy = getCursorPos()
+					if isKeyJustPressed(VK_ESCAPE) then
+						changepos = false
+						showCursor(false, false)
+						main_window.v = true
+						sampAddChatMessage(tag .. color_text .. "Окно было {FFFFFF}возвращено{FFFF00} на прежнюю позицию", main_color)
+					elseif isKeyJustPressed(VK_RETURN) then
+						changepos = false
+						flinke.cfg.posx = posx
+						flinke.cfg.posy = posy
+						inicfg.save(flinke, "flinke")
+						showCursor(false, false)
+						main_window.v = true
+						sampAddChatMessage(tag .. color_text .. "{FFFFFF}Сохранено{FFFF00} в конфиг. Настройка будут применяться после каждого входа в игру {FFFFFF}АВТОМАТИЧЕСКИ", main_color)
+					end
+				end
+			end
+		end)
+	else
+		sampAddChatMessage(tag .. color_text .. "Сначала нужно {FFFFFF}активировать{FFFF00} доп. окно. Введи: {FFFFFF}/eurocounter", main_color)
+	end
+end
+
+function fcr()
+	if changepos then
+		sampAddChatMessage(tag .. color_text .. "Сначала нужно {FFFFFF}выйти{FFFF00} из режима смены позиции окна", main_color)
+	else
+		flinke.cfg.posx = 0
+		flinke.cfg.posy = sh / 2
+		inicfg.save(flinke, "flinke")
+		sampAddChatMessage(tag .. color_text .. "Позиция окна была {FFFFFF}возвращена{FFFF00} на позицию по умолчанию", main_color)
+		sampAddChatMessage(tag .. color_text .. "{FFFFFF}Сохранено{FFFF00} в конфиг. Настройка будут применяться после каждого входа в игру {FFFFFF}АВТОМАТИЧЕСКИ", main_color)
+	end
+end
+
+function newssilkatime()
+	lua_thread.create(function()
+		while true do
+			wait(0)
+			if newssilkaa then
+				table.insert(ln, ssilka)
+				newssilkaa = false
+				newssilka = true
+				newssilkatime()
+			end
+		end
+	end)
+end
+
+function examplee()
+	if main_window.v then
+		main_window.v = false
+		example = true
+		two_window.v = true
+		lua_thread.create(function ()
+			while true do
+				wait(0)
+				if example then
+					wait(5000)
+					example = false
+					main_window.v = true
+					break
+				end
+			end
+		end)
+	end
+end
+
 function mn()
 	main_window.v = not main_window.v
 	imgui.Process = main_window.v
 end
 
 function history()
-	sampShowDialog(1337, "{FFFF00}История обновлений скрипта {FFFFFF}FastLink", "{FFFF00}Версия {FFFFFF}1.0{FFFF00}:\n{FFFFFF}- Релиз\n{FFFF00}Версия {FFFFFF}1.1{FFFF00}:\n{FFFFFF}- Теперь если в ссылке нет https:// или http://, скрипт найдет эту ссылку, если у нее будет один из доменов из массива\n{FFFF00}Версия {FFFFFF}1.2{FFFF00}:\n{FFFFFF}- Была добавлена команда, показывающая всю информацию о скрипте, \"/flinkinfo\"\n- Была добавлена возможность отключать скрипт (по умолчанию включен), \"/flinkwork\"\n{FFFF00}Версия {FFFFFF}1.21{FFFF00}:\n{FFFFFF}- Добавлен домен: .sk (для яндекс диска)\n{FFFF00}Версия {FFFFFF}1.3{FFFF00}:\n{FFFFFF}- Добавлено очень много новых доменов\n{FFFF00}Версия {FFFFFF}1.31{FFFF00}:\n{FFFFFF}- Более точное обнаружение ссылок в чате (доведено до идеала)\n{FFFF00}Версия {FFFFFF}1.4{FFFF00}:\n{FFFFFF}- Добавлено авто-обновление скрипта по команде, \"/flinkupd\"\n- Добавлена команда, проверяющая наличие обновлений скрипта, \"/flinkupdcheck\"\n- Добавлена команда, которая переносит в группу скрипта во ВКонтакте (самые первые новости об обновлениях), \"/flinkupdinfo\"\n- Добавлена команда, показывающая историю обновлений скрипта, \"/flinkupdhistory\"\n{FFFF00}Версия {FFFFFF}1.5{FFFF00}:\n{FFFFFF}- Теперь скрипт сам устанавливает все необходимые библиотеки (на данный момент криво, но работает)\n- Теперь при краше скрипта, будет вылезать соответствующее диалоговое окно\n{FFFF00}Версия {FFFFFF}1.6{FFFF00}:\n{FFFFFF}- {FFFFFF}Исправлена {FFFF00}проблема, когда скрипт крашил при запуске {FFFFFF}ГТА{FFFF00}\n{FFFFFF}- Команды были {FFFFFF}урезаны{FFFF00}:\n     {FFFFFF}/fastlink - /flink\n     /fastlinkwork - /flinkwork\n     /fastlinkupdate - /flinkupd\n     /fastlinkupdatecheck - /flinkupdcheck\n     /fastlinkupdateinfo - /flinkupdinfo\n     /fastlinkupdatehistory - /flinkupdhistory\n{FFFF00}Версия {FFFFFF}2.0{FFFF00}:\n{FFFFFF}- В скрипт было добавлено новое ImGui (Immediate Mode Graphic user interface) окно, в котором можно выключить скрипт, а также перейти либо скопировать три последние найденные ссылки, \"/flinkmn\"", "{ff0000}Закрыть", nil, DIALOG_STYLE_MSGBOX)
+	sampShowDialog(1337, "{FFFF00}История обновлений скрипта {FFFFFF}FastLink", "{FFFF00}Версия {FFFFFF}1.0{FFFF00}:\n{FFFFFF}- Релиз\n{FFFF00}Версия {FFFFFF}1.1{FFFF00}:\n{FFFFFF}- Теперь если в ссылке нет https:// или http://, скрипт найдет эту ссылку, если у нее будет один из доменов из массива\n{FFFF00}Версия {FFFFFF}1.2{FFFF00}:\n{FFFFFF}- Была добавлена команда, показывающая всю информацию о скрипте, \"/flinkinfo\"\n- Была добавлена возможность отключать скрипт (по умолчанию включен), \"/flinkwork\"\n{FFFF00}Версия {FFFFFF}1.21{FFFF00}:\n{FFFFFF}- Добавлен домен: .sk (для яндекс диска)\n{FFFF00}Версия {FFFFFF}1.3{FFFF00}:\n{FFFFFF}- Добавлено очень много новых доменов\n{FFFF00}Версия {FFFFFF}1.31{FFFF00}:\n{FFFFFF}- Более точное обнаружение ссылок в чате (доведено до идеала)\n{FFFF00}Версия {FFFFFF}1.4{FFFF00}:\n{FFFFFF}- Добавлено авто-обновление скрипта по команде, \"/flinkupd\"\n- Добавлена команда, проверяющая наличие обновлений скрипта, \"/flinkupdcheck\"\n- Добавлена команда, которая переносит в группу скрипта во ВКонтакте (самые первые новости об обновлениях), \"/flinkupdinfo\"\n- Добавлена команда, показывающая историю обновлений скрипта, \"/flinkupdhistory\"\n{FFFF00}Версия {FFFFFF}1.5{FFFF00}:\n{FFFFFF}- Теперь скрипт сам устанавливает все необходимые библиотеки (на данный момент криво, но работает)\n- Теперь при краше скрипта, будет вылезать соответствующее диалоговое окно\n{FFFF00}Версия {FFFFFF}1.6{FFFF00}:\n{FFFFFF}- Исправлена проблема, когда скрипт крашил при запуске ГТА\n{FFFFFF}- Команды были {FFFFFF}урезаны{FFFF00}:\n     {FFFFFF}/fastlink - /flink\n     /fastlinkwork - /flinkwork\n     /fastlinkupdate - /flinkupd\n     /fastlinkupdatecheck - /flinkupdcheck\n     /fastlinkupdateinfo - /flinkupdinfo\n     /fastlinkupdatehistory - /flinkupdhistory\n{FFFF00}Версия {FFFFFF}2.0{FFFF00}:\n{FFFFFF}- В скрипт было добавлено новое ImGui (Immediate Mode Graphic user interface) окно, в котором можно выключить скрипт, а также перейти либо скопировать три последние найденные ссылки, \"/flinkmn\"\n{FFFF00}Версия {FFFFFF}2.1{FFFF00}:\n{FFFFFF}- Теперь скрипт умеет выводить найденные ссылки ни только в чат, но еще и в доп. ImGui окно!\n- В \"/flinkmn\" появились новые настройки, такие как:\n     - Выбор показа найденных ссылок (чат либо новое доп. ImGui окно)\n     - Изменение позиции доп. ImGui окна (кнопка появляется только если выбрана настройка отправки найденной ссылки в новое доп. ImGui окно)\n     - Сброс позиции доп. ImGui окна (кнопка появляется только если выбрана настройка отправки найденной ссылки в новое доп. ImGui окно)", "{ff0000}Закрыть", nil, DIALOG_STYLE_MSGBOX)
 end
 
 function onScriptTerminate(script, quitGame)
@@ -620,8 +723,13 @@ function sampev.onServerMessage(color, msg)
 			time1 = os.date("%X")
 			abobus = true
 			naideno = true
-			sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
-			sampAddChatMessage(tag .. color_text .. "Ссылка: {FFFFFF}" .. ssilka, main_color)
+			if flinke.cfg.cchat then
+				sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
+				sampAddChatMessage(tag .. color_text .. "Ссылка: {FFFFFF}" .. ssilka, main_color)
+			elseif flinke.cfg.cimgui then
+				newssilkaa = true
+				newssilkatime()
+			end
 		end
 		if msg:find("http://(%S+)") then
 			if ssilka ~= nil then
@@ -642,8 +750,13 @@ function sampev.onServerMessage(color, msg)
 			time1 = os.date("%X")
 			abobus = true
 			naideno = true
-			sampAddChatMessage(tag..color_text.."В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
-			sampAddChatMessage(tag .. color_text .. "Ссылка: {FFFFFF}" .. ssilka, main_color)
+			if flinke.cfg.cchat then
+				sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
+				sampAddChatMessage(tag .. color_text .. "Ссылка: {FFFFFF}" .. ssilka, main_color)
+			elseif flinke.cfg.cimgui then
+				newssilkaa = true
+				newssilkatime()
+			end
 		end
 		if not naideno then
 			for _,v in ipairs(l) do
@@ -670,8 +783,13 @@ function sampev.onServerMessage(color, msg)
 						ssilka = ssilka:gsub('{......}', '')
 					end
 					abobus = true
-					sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
-					sampAddChatMessage(tag .. color_text .. "Ссылка: {FFFFFF}" .. ssilka, main_color)
+					if flinke.cfg.cchat then
+						sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
+						sampAddChatMessage(tag .. color_text .. "Ссылка: {FFFFFF}" .. ssilka, main_color)
+					elseif flinke.cfg.cimgui then
+						newssilkaa = true
+						newssilkatime()
+					end
 				elseif msg:match("(%S+)%." .. v .. "/") and not naideno then
 					if ssilka ~= nil then
 						if ssilka2 ~= nil then
@@ -695,8 +813,13 @@ function sampev.onServerMessage(color, msg)
 						ssilka = ssilka:gsub('{......}', '')
 					end
 					abobus = true
-					sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
-					sampAddChatMessage(tag .. color_text .. "Ссылка: {FFFFFF}" .. ssilka, main_color)
+					if flinke.cfg.cchat then
+						sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
+						sampAddChatMessage(tag .. color_text .. "Ссылка: {FFFFFF}" .. ssilka, main_color)
+					elseif flinke.cfg.cimgui then
+						newssilkaa = true
+						newssilkatime()
+					end
 				elseif msg:match("(%S+)%." .. v) and not naideno then
 					if msg:match("(%S+)%." .. v) then
 						if not msg:match("(%S+)%." .. v .. "%S+") then
@@ -722,8 +845,13 @@ function sampev.onServerMessage(color, msg)
 								ssilka = ssilka:gsub('{......}', '')
 							end
 							abobus = true
-							sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
-							sampAddChatMessage(tag .. color_text .. "Ссылка: {FFFFFF}" .. ssilka, main_color)
+							if flinke.cfg.cchat then
+								sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
+								sampAddChatMessage(tag .. color_text .. "Ссылка: {FFFFFF}" .. ssilka, main_color)
+							elseif flinke.cfg.cimgui then
+								newssilkaa = true
+								newssilkatime()
+							end
 						end
 					end
 				end
@@ -871,18 +999,17 @@ function imgui.BeforeDrawFrame()
     if fontsize18 == nil then
     	fontsize18 = imgui.GetIO().Fonts:AddFontFromFileTTF(getFolderPath(0x14) .. '\\trebucbd.ttf', 18.0, nil, imgui.GetIO().Fonts:GetGlyphRangesCyrillic())
     end
+    if fontsize16 == nil then
+    	fontsize16 = imgui.GetIO().Fonts:AddFontFromFileTTF(getFolderPath(0x14) .. '\\trebucbd.ttf', 16.0, nil, imgui.GetIO().Fonts:GetGlyphRangesCyrillic())
+    end
 end
 
 function imgui.OnDrawFrame()
-	if not main_window.v then
-		imgui.Process = false
-		imgui.ShowCursor = false
-	end
 	if main_window.v then
 		apply_custom_style()
 		imgui.ShowCursor = true
-		imgui.SetNextWindowSize(imgui.ImVec2(1200, 160), imgui.Cond.FirstUseEver)
-		imgui.SetNextWindowPos(imgui.ImVec2(sw / 2 - 600, sh / 2 - 80))
+		imgui.SetNextWindowSize(imgui.ImVec2(1200, 280), imgui.Cond.FirstUseEver)
+		imgui.SetNextWindowPos(imgui.ImVec2(sw / 2 - 600, sh / 2 - 140))
 		imgui.Begin(u8"FastLink", nil, imgui.WindowFlags.NoResize + imgui.WindowFlags.NoCollapse + imgui.WindowFlags.NoMove)
 		imgui.BeginChild("ssilki", imgui.ImVec2(1188, 95), true, imgui.WindowFlags.NoScrollbar)
 		if ssilka ~= nil then
@@ -890,12 +1017,12 @@ function imgui.OnDrawFrame()
 				ssilka = ssilka:gsub('{......}', '')
 				imgui.TextColoredRGB("{003399}Ссылка {000000}\"{355e3b}" .. ssilka .. "{000000}\"{003399}, была получена в {9400d3}" .. time1 .. " {003399}|")
 				imgui.SameLine()
-				if imgui.CustomButton(u8"   перейти   ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00)) then
+				if imgui.CustomButton(u8"   перейти   ", imgui.ImVec4(0.00, 0.49, 1.00, 0.59), imgui.ImVec4(0.00, 0.49, 1.00, 0.71), imgui.ImVec4(0.00, 0.49, 1.00, 0.78)) then
 					os.execute("start " .. ssilka)
 					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Переходим {FFFF00}по ссылке...", main_color)
 				end
 				imgui.SameLine()
-				if imgui.CustomButton(u8"   скопировать   ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00)) then
+				if imgui.CustomButton(u8"   скопировать   ", imgui.ImVec4(0.00, 0.49, 1.00, 0.59), imgui.ImVec4(0.00, 0.49, 1.00, 0.71), imgui.ImVec4(0.00, 0.49, 1.00, 0.78)) then
 					setClipboardText(ssilka)
 					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Скопировано {FFFF00}в буффер обмена", main_color)
 				end
@@ -906,12 +1033,12 @@ function imgui.OnDrawFrame()
 				ssilka2 = ssilka2:gsub('{......}', '')
 				imgui.TextColoredRGB("{003399}Ссылка {000000}\"{355e3b}" .. ssilka2 .. "{000000}\"{003399}, была получена в {9400d3}" .. time2 .. " {003399}|")
 				imgui.SameLine()
-				if imgui.CustomButton(u8"   перейти    ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00)) then
+				if imgui.CustomButton(u8"   перейти    ", imgui.ImVec4(0.00, 0.49, 1.00, 0.59), imgui.ImVec4(0.00, 0.49, 1.00, 0.71), imgui.ImVec4(0.00, 0.49, 1.00, 0.78)) then
 					os.execute("start " .. ssilka2)
 					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Переходим {FFFF00}по ссылке...", main_color)
 				end
 				imgui.SameLine()
-				if imgui.CustomButton(u8"   скопировать    ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00)) then
+				if imgui.CustomButton(u8"   скопировать    ", imgui.ImVec4(0.00, 0.49, 1.00, 0.59), imgui.ImVec4(0.00, 0.49, 1.00, 0.71), imgui.ImVec4(0.00, 0.49, 1.00, 0.78)) then
 					setClipboardText(ssilka2)
 					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Скопировано {FFFF00}в буффер обмена", main_color)
 				end
@@ -922,12 +1049,12 @@ function imgui.OnDrawFrame()
 				ssilka3 = ssilka3:gsub('{......}', '')
 				imgui.TextColoredRGB("{003399}Ссылка {000000}\"{355e3b}" .. ssilka3 .. "{000000}\"{003399}, была получена в {9400d3}" .. time3 .. " {003399}|")
 				imgui.SameLine()
-				if imgui.CustomButton(u8"   перейти     ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00))  then
+				if imgui.CustomButton(u8"   перейти     ", imgui.ImVec4(0.00, 0.49, 1.00, 0.59), imgui.ImVec4(0.00, 0.49, 1.00, 0.71), imgui.ImVec4(0.00, 0.49, 1.00, 0.78))  then
 					os.execute("start " .. ssilka3)
 					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Переходим {FFFF00}по ссылке...", main_color)
 				end
 				imgui.SameLine()
-				if imgui.CustomButton(u8"   скопировать     ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00)) then
+				if imgui.CustomButton(u8"   скопировать     ", imgui.ImVec4(0.00, 0.49, 1.00, 0.59), imgui.ImVec4(0.00, 0.49, 1.00, 0.71), imgui.ImVec4(0.00, 0.49, 1.00, 0.78)) then
 					setClipboardText(ssilka3)
 					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Скопировано {FFFF00}в буффер обмена", main_color)
 				end
@@ -955,16 +1082,85 @@ function imgui.OnDrawFrame()
 		end
 		imgui.SameLine()
 		imgui.PushFont(fontsize18)
-			if imgui.CustomButton(u8"   проверить наличие обновлений   ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00))  then
+			if imgui.CustomButton(u8"   проверить наличие обновлений   ", imgui.ImVec4(0.00, 0.49, 1.00, 0.59), imgui.ImVec4(0.00, 0.49, 1.00, 0.71), imgui.ImVec4(0.00, 0.49, 1.00, 0.78))  then
 				updcheck()
 			end
 		imgui.PopFont()
 		imgui.SameLine()
 		imgui.PushFont(fontsize18)
-			if imgui.CustomButton(u8"   обновить   ", imgui.ImVec4(0.00, 0.17, 1.00, 1.00), imgui.ImVec4(0.00, 0.36, 1.00, 1.00), imgui.ImVec4(0.00, 0.17, 1.00, 1.00))  then
+			if imgui.CustomButton(u8"   обновить   ", imgui.ImVec4(0.00, 0.49, 1.00, 0.59), imgui.ImVec4(0.00, 0.49, 1.00, 0.71), imgui.ImVec4(0.00, 0.49, 1.00, 0.78))  then
 				upd()
 			end
 		imgui.PopFont()
+		imgui.Separator()
+		imgui.PushFont(fontsize18)
+			imgui.TextColoredRGB("{003399}Показывать {355e3b}найденные {003399}ссылки через...")
+			if imgui.RadioButton(u8"чат", radio, 1) then
+				flinke.cfg.cimgui = false
+				flinke.cfg.cchat = true
+				inicfg.save(flinke, "flinke")
+			end
+			imgui.SameLine()
+			if imgui.CustomButton(u8"   проверить как будет выводить   ##1", imgui.ImVec4(0.00, 0.49, 1.00, 0.59), imgui.ImVec4(0.00, 0.49, 1.00, 0.71), imgui.ImVec4(0.00, 0.49, 1.00, 0.78))  then
+				sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
+				sampAddChatMessage(tag .. color_text .. "Ссылка: {FFFFFF}example-link.com/2281337", main_color)
+			end
+			if imgui.RadioButton(u8"дополнительное маленькое ImGui окно", radio, 2) then
+				flinke.cfg.cimgui = true
+				flinke.cfg.cchat = false
+				inicfg.save(flinke, "flinke")
+			end
+			imgui.SameLine()
+			if imgui.CustomButton(u8"   проверить как будет выводить   ##2", imgui.ImVec4(0.00, 0.49, 1.00, 0.59), imgui.ImVec4(0.00, 0.49, 1.00, 0.71), imgui.ImVec4(0.00, 0.49, 1.00, 0.78))  then
+				examplee()
+			end
+			if flinke.cfg.cimgui then
+				if imgui.CustomButton(u8"   изменить положение доп. окна на экране   ", imgui.ImVec4(0.00, 0.49, 1.00, 0.59), imgui.ImVec4(0.00, 0.49, 1.00, 0.71), imgui.ImVec4(0.00, 0.49, 1.00, 0.78))  then
+					fcp()
+				end
+				imgui.SameLine()
+				if imgui.CustomButton(u8"   сбросить положение доп. окна на экране   ", imgui.ImVec4(0.00, 0.49, 1.00, 0.59), imgui.ImVec4(0.00, 0.49, 1.00, 0.71), imgui.ImVec4(0.00, 0.49, 1.00, 0.78))  then
+					fcr()
+				end
+			end
+		imgui.PopFont()
 		imgui.End()
+	end
+	if two_window.v then
+		apply_custom_style()
+		if changepos then
+			imgui.SetNextWindowPos(imgui.ImVec2(posx, posy))
+			imgui.Begin(u8" FastLink ", nil, imgui.WindowFlags.NoResize + imgui.WindowFlags.NoCollapse + imgui.WindowFlags.NoMove + imgui.WindowFlags.NoScrollbar)
+			imgui.PushFont(fontsize16)
+				imgui.TextColoredRGB("{003399}Найдена новая ссылка...")
+				imgui.TextColoredRGB("{355e3b}example-link.com/2281337")
+				imgui.TextColoredRGB("{003399}Перейти: клавиша {355e3b}F2{003399}, либо команда {355e3b}\"/flink\"")
+			imgui.PopFont()
+			imgui.End()
+		end
+		if example then
+			imgui.SetNextWindowSize(imgui.ImVec2(310, 90), imgui.Cond.FirstUseEver)
+			imgui.SetNextWindowPos(imgui.ImVec2(flinke.cfg.posx, flinke.cfg.posy))
+			imgui.Begin(u8" FastLink ", nil, imgui.WindowFlags.NoResize + imgui.WindowFlags.NoCollapse + imgui.WindowFlags.NoMove + imgui.WindowFlags.NoScrollbar)
+			imgui.PushFont(fontsize16)
+				imgui.TextColoredRGB("{003399}Найдена новая ссылка...")
+				imgui.TextColoredRGB("{355e3b}example-link.com/2281337")
+				imgui.TextColoredRGB("{003399}Перейти: клавиша {355e3b}F2{003399}, либо команда {355e3b}\"/flink\"")
+			imgui.PopFont()
+			imgui.End()
+		end
+		if flinke.cfg.cimgui then
+			if mojnavivod  then
+				imgui.SetNextWindowSize(imgui.ImVec2(310, 90), imgui.Cond.FirstUseEver)
+				imgui.SetNextWindowPos(imgui.ImVec2(flinke.cfg.posx, flinke.cfg.posy))
+				imgui.Begin(u8" FastLink ", nil, imgui.WindowFlags.NoResize + imgui.WindowFlags.NoCollapse + imgui.WindowFlags.NoMove + imgui.WindowFlags.NoScrollbar)
+				imgui.PushFont(fontsize16)
+					imgui.TextColoredRGB("{003399}Найдена новая ссылка...")
+					imgui.TextColoredRGB("{355e3b}" .. vivodssilka)
+					imgui.TextColoredRGB("{003399}Перейти: клавиша {355e3b}F2{003399}, либо команда {355e3b}\"/flink\"")
+				imgui.PopFont()
+				imgui.End()
+			end
+		end
 	end
 end
