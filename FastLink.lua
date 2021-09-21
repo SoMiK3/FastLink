@@ -809,9 +809,6 @@ function main()
 				end
 			end
 		end
-		if isKeyJustPressed(VK_NUMPAD4) then
-			thisScript():reload()
-		end
 	end
 end
 
