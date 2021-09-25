@@ -5,7 +5,7 @@ require "lib.moonloader"
 
 script_name("FastLink")
 script_author("СоМиК")
-script_version("2.2")
+script_version("3.0")
 script_properties("work-in-pause")
 
 local main_color = 0x5A90CE
@@ -14,12 +14,13 @@ local tag = "[Fastlink]: "
 
 local dlstatus = require('moonloader').download_status
 
-local script_vers = 7
-local script_vers_text = "2.2"
+local script_vers = 8
+local script_vers_text = "3.0"
 local script_path = thisScript().path
 local script_url = "https://raw.githubusercontent.com/SoMiK3/FastLink/main/FastLink.lua"
 local update_path = getWorkingDirectory() .. "/flinkupdate.ini"
 local update_url = "https://raw.githubusercontent.com/SoMiK3/FastLink/main/flinkupdate.ini"
+local config_path = getWorkingDirectory() .. "/config/flinke.ini"
 
 local MoonFolder = getWorkingDirectory()
 local MoonLibFolder = MoonFolder .. "\\lib"
@@ -32,6 +33,8 @@ local bitstream_io_url = "https://raw.githubusercontent.com/THE-FYP/SAMP.Lua/mas
 local core_url = "https://raw.githubusercontent.com/THE-FYP/SAMP.Lua/master/samp/events/core.lua"
 local imgui_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/imgui.lua"
 local imguidll_url = "https://github.com/SoMiK3/FastLinkLibs/blob/main/MoonImGui.dll?raw=true"
+local fAwesome5_url = "https://raw.githubusercontent.com/SoMiK3/FastLinkLibs/main/fAwesome5.lua"
+local fa_solid_900_url = "https://github.com/SoMiK3/FastLinkLibs/blob/main/fa-solid-900.ttf?raw=true"
 -- ДЛЯ МОДЕРАТОРОВ BLASTHACK. МНЕ СКАЗАЛИ, ЧТО ССЫЛКУ НА ИМГУИ МОЖНО НЕ МЕНЯТЬ, ТАК КАК ИМГУИ ОБНОВЛЯТЬСЯ НЕ БУДЕТ. НЕ НАДО ИЗ-ЗА ЭТОГО ОТПРАВЛЯТЬ ФАЙЛ НА ПОВТОРНУЮ ПРЕМОДЕРАЦИЮ, МОГУ ПОКАЗАТЬ ЧТО МНЕ ОТВЕТИЛ ВСЕФОРУМ.
 nalichie = true
 
@@ -49,6 +52,12 @@ if not doesDirectoryExist("moonloader//lib//samp") then
 end
 if not doesDirectoryExist("moonloader//lib//samp//events") then
 	createDirectory("moonloader//lib//samp//events")
+end
+if not doesDirectoryExist("moonloader//lib//resource") then
+	createDirectory("moonloader//lib//resource")
+end
+if not doesDirectoryExist("moonloader//lib//resource//fonts") then
+	createDirectory("moonloader//lib//resource//fonts")
 end
 
 if not doesFileExist(MoonLibFolder .."\\samp\\events.lua") then
@@ -83,28 +92,20 @@ if not doesFileExist(MoonLibFolder .."\\imgui.lua") then
 	downloadUrlToFile(imgui_url, MoonLibFolder .."\\imgui.lua")
 	nalichie = false
 end
+if not doesFileExist(MoonLibFolder .."\\fAwesome5.lua") then
+	downloadUrlToFile(fAwesome5_url, MoonLibFolder .."\\fAwesome5.lua")
+	nalichie = false
+end
+if not doesFileExist(MoonLibFolder .."\\resource\\fonts\\fa-solid-900.ttf") then
+	downloadUrlToFile(fa_solid_900_url, MoonLibFolder .."\\resource\\fonts\\fa-solid-900.ttf")
+	nalichie = false
+end
 if not doesFileExist(MoonLibFolder .."\\MoonImGui.dll") then
 	downloadUrlToFile(imguidll_url, MoonLibFolder .."\\MoonImGui.dll")
 	nalichie = false
-	lua_thread.create(function()
-		while true do
-			wait(1000)
-			if not nalichie then
-				thisScript():reload()
-				break
-			end
-		end
-	end)
-else
-	lua_thread.create(function()
-		while true do
-			wait(1000)
-			if not nalichie then
-				thisScript():reload()
-				break
-			end
-		end
-	end)
+end
+if not nalichie then
+	thisScript():reload()
 end
 
 local sampev = require "lib.samp.events"
@@ -160,6 +161,8 @@ local encoding = require "encoding"
 encoding.default = "CP1251"
 u8 = encoding.UTF8
 
+local menuSelected = 1
+
 local main_window = imgui.ImBool(false)
 local two_window = imgui.ImBool(false)
 local local_text = imgui.ImBuffer(50)
@@ -176,6 +179,12 @@ local activeKeys = {
 	v = decodeJson(flinke.cfg.bindKey)
 }
 local tLastKeys = {}
+
+local fa_font = nil
+local fa = require 'fAwesome5'
+local fa_glyph_ranges = imgui.ImGlyphRanges({ fa.min_range, fa.max_range })
+
+local page = 1
 
 function main()
 	if not isSampLoaded() or not isSampfuncsLoaded() then return end
@@ -761,6 +770,8 @@ function main()
 				if status == dlstatus.STATUS_ENDDOWNLOADDATA then
 					sampAddChatMessage(tag .. color_text .. "Обновление {FFFFFF}успешно{FFFF00} установлено. Новая версия: {FFFFFF}" .. updateIni.info.vers_text, main_color)
 					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Узнать{FFFF00} историю обновлений можно, введя {FFFFFF}/flinkupdhistory", main_color)
+					sampAddChatMessage(tag .. color_text .. "Конфиг был автоматически {FFFFFF}сброшен {FFFF00}до состояния по умолчанию", main_color)
+					os.remove(config_path)
 				end
 			end)
 			break
@@ -1019,7 +1030,7 @@ function deleteignorelinklocal()
 	file:close()
 	i = 1
 	local decodea = decodeJson(a)
-	for _, v in ipairs(decodea["locall"]) do    
+	for _, v in ipairs(decodea["locall"]) do
 		if local_text.v == v then
 			table.remove(decodea["locall"], i)
 			linkDeleted = true
@@ -2440,7 +2451,7 @@ function apply_custom_style()
 	style.GrabMinSize = 20.0
 	style.GrabRounding = 16.0
 	style.WindowTitleAlign = imgui.ImVec2(0.5, 0.5)
-	style.ButtonTextAlign = imgui.ImVec2(0.5, 0.5)
+	style.ButtonTextAlign = imgui.ImVec2(0.5, 0.15)
 
 	if theme == 1 then
 		colors[clr.Text]                   = ImVec4(0.00, 0.00, 0.00, 1.00)
@@ -2465,9 +2476,9 @@ function apply_custom_style()
 		colors[clr.CheckMark]              = ImVec4(a1, b1, c1, 0.97)
 		colors[clr.SliderGrab]             = ImVec4(0.00, 0.29, 1.00, 0.76)
 		colors[clr.SliderGrabActive]       = ImVec4(0.00, 0.45, 1.00, 0.99)
-		colors[clr.Button]                 = ImVec4(0.00, 0.51, 1.00, 0.60)
-		colors[clr.ButtonHovered]          = ImVec4(0.00, 0.40, 0.62, 1.00)
-		colors[clr.ButtonActive]           = ImVec4(0.00, 0.59, 0.92, 1.00)
+		colors[clr.Button]                 = ImVec4(a1, b1, c1, 0.7)
+		colors[clr.ButtonHovered]          = ImVec4(a1, b1, c1, 1.00)
+		colors[clr.ButtonActive]           = ImVec4(a1, b1, c1, 0.5)
 		colors[clr.Header]                 = ImVec4(0.06, 0.55, 0.87, 0.70)
 		colors[clr.HeaderHovered]          = ImVec4(0.03, 0.21, 0.95, 0.46)
 		colors[clr.HeaderActive]           = ImVec4(0.05, 0.05, 0.69, 0.80)
@@ -2492,7 +2503,7 @@ function apply_custom_style()
 		colors[clr.WindowBg]               = ImVec4(0.00, 0.00, 0.00, 0.95)
 		colors[clr.ChildWindowBg]          = ImVec4(0.00, 0.00, 0.00, 0.00)
 		colors[clr.PopupBg]                = ImVec4(0.35, 0.35, 0.35, 0.80)
-		colors[clr.Border]                 = ImVec4(0.70, 0.70, 0.70, 0.40)
+		colors[clr.Border]                 = ImVec4(1.00, 1.00, 1.00, 1.00)
 		colors[clr.BorderShadow]           = ImVec4(0.00, 0.00, 0.00, 0.00)
 		colors[clr.FrameBg]                = ImVec4(0.80, 0.80, 0.80, 0.30)
 		colors[clr.FrameBgHovered]         = ImVec4(1.00, 1.00, 1.00, 0.53)
@@ -2509,9 +2520,9 @@ function apply_custom_style()
 		colors[clr.CheckMark]              = ImVec4(a1, b1, c1, 1.00)
 		colors[clr.SliderGrab]             = ImVec4(1.00, 1.00, 1.00, 0.54)
 		colors[clr.SliderGrabActive]       = ImVec4(1.00, 1.00, 1.00, 0.80)
-		colors[clr.Button]                 = ImVec4(0.00, 0.48, 1.00, 0.58)
-		colors[clr.ButtonHovered]          = ImVec4(0.00, 0.42, 1.00, 1.00)
-		colors[clr.ButtonActive]           = ImVec4(0.00, 0.42, 1.00, 0.49)
+		colors[clr.Button]                 = ImVec4(a1, b1, c1, 0.7)
+		colors[clr.ButtonHovered]          = ImVec4(a1, b1, c1, 1.00)
+		colors[clr.ButtonActive]           = ImVec4(a1, b1, c1, 0.5)
 		colors[clr.Header]                 = ImVec4(1.00, 1.00, 1.00, 0.08)
 		colors[clr.HeaderHovered]          = ImVec4(0.99, 0.99, 1.00, 0.34)
 		colors[clr.HeaderActive]           = ImVec4(1.00, 1.00, 1.00, 0.74)
@@ -2687,370 +2698,628 @@ function join_argb(a, r, g, b)
 	return argb
 end
 
-function imgui.BeforeDrawFrame()
-	if fontsize40 == nil then
-		fontsize40 = imgui.GetIO().Fonts:AddFontFromFileTTF(getFolderPath(0x14) .. '\\comicbd.ttf', 40.0, nil, imgui.GetIO().Fonts:GetGlyphRangesCyrillic())
-	end
-	if fontsize20 == nil then
-		fontsize20 = imgui.GetIO().Fonts:AddFontFromFileTTF(getFolderPath(0x14) .. '\\comicbd.ttf', 20.0, nil, imgui.GetIO().Fonts:GetGlyphRangesCyrillic())
-	end
-	if fontsize20 == nil then
-		fontsize20 = imgui.GetIO().Fonts:AddFontFromFileTTF(getFolderPath(0x14) .. '\\comicbd.ttf', 20.0, nil, imgui.GetIO().Fonts:GetGlyphRangesCyrillic())
-	end
+local clor = join_argb(0, a1 * 255, b1 * 255, c1 * 255)
+d1 = ('%06X'):format(clor)
+d1 = "{" .. d1 .. "}"
+
+function imgui.VerticalSeparator()
+	local p = imgui.GetCursorScreenPos()
+	imgui.GetWindowDrawList():AddLine(imgui.ImVec2(p.x, p.y), imgui.ImVec2(p.x, p.y + imgui.GetContentRegionMax().y - 33), imgui.GetColorU32(imgui.GetStyle().Colors[imgui.Col.Separator]))
 end
 
+function imgui.BeforeDrawFrame()
+	if fa_font == nil then
+		local font_config = imgui.ImFontConfig()
+		font_config.MergeMode = true
+		fa_font = imgui.GetIO().Fonts:AddFontFromFileTTF('moonloader/lib/resource/fonts/fa-solid-900.ttf', 18.0, font_config, fa_glyph_ranges)
+	end
+	if fontsize40 == nil then
+		fontsize40 = imgui.GetIO().Fonts:AddFontFromFileTTF(getFolderPath(0x14) .. '\\comicbd.ttf', 40.0, nil, imgui.GetIO().Fonts:GetGlyphRangesCyrillic())
+		local font_config = imgui.ImFontConfig()
+		font_config.MergeMode = true
+		fa_font = imgui.GetIO().Fonts:AddFontFromFileTTF('moonloader/lib/resource/fonts/fa-solid-900.ttf', 18.0, font_config, fa_glyph_ranges)
+	end
+	if fontsize20 == nil then
+		fontsize20 = imgui.GetIO().Fonts:AddFontFromFileTTF(getFolderPath(0x14) .. '\\comicbd.ttf', 20.0, nil, imgui.GetIO().Fonts:GetGlyphRangesCyrillic())
+		local font_config = imgui.ImFontConfig()
+		font_config.MergeMode = true
+		fa_font = imgui.GetIO().Fonts:AddFontFromFileTTF('moonloader/lib/resource/fonts/fa-solid-900.ttf', 18.0, font_config, fa_glyph_ranges)
+	end
+	if fontsize30 == nil then
+		fontsize30 = imgui.GetIO().Fonts:AddFontFromFileTTF(getFolderPath(0x14) .. '\\comicbd.ttf', 30.0, nil, imgui.GetIO().Fonts:GetGlyphRangesCyrillic())
+		local font_config = imgui.ImFontConfig()
+		font_config.MergeMode = true
+		fa_font = imgui.GetIO().Fonts:AddFontFromFileTTF('moonloader/lib/resource/fonts/fa-solid-900.ttf', 18.0, font_config, fa_glyph_ranges)
+	end
+	if fontsize35 == nil then
+		fontsize35 = imgui.GetIO().Fonts:AddFontFromFileTTF(getFolderPath(0x14) .. '\\comicbd.ttf', 35.0, nil, imgui.GetIO().Fonts:GetGlyphRangesCyrillic())
+		local font_config = imgui.ImFontConfig()
+		font_config.MergeMode = true
+		fa_font = imgui.GetIO().Fonts:AddFontFromFileTTF('moonloader/lib/resource/fonts/fa-solid-900.ttf', 18.0, font_config, fa_glyph_ranges)
+	end
+	if fontsize25 == nil then
+		fontsize25 = imgui.GetIO().Fonts:AddFontFromFileTTF(getFolderPath(0x14) .. '\\comicbd.ttf', 25.0, nil, imgui.GetIO().Fonts:GetGlyphRangesCyrillic())
+		local font_config = imgui.ImFontConfig()
+		font_config.MergeMode = true
+		fa_font = imgui.GetIO().Fonts:AddFontFromFileTTF('moonloader/lib/resource/fonts/fa-solid-900.ttf', 18.0, font_config, fa_glyph_ranges)
+	end
+	if fontsize18 == nil then
+		fontsize18 = imgui.GetIO().Fonts:AddFontFromFileTTF(getFolderPath(0x14) .. '\\comicbd.ttf', 18.0, nil, imgui.GetIO().Fonts:GetGlyphRangesCyrillic())
+		local font_config = imgui.ImFontConfig()
+		font_config.MergeMode = true
+		fa_font = imgui.GetIO().Fonts:AddFontFromFileTTF('moonloader/lib/resource/fonts/fa-solid-900.ttf', 15.0, font_config, fa_glyph_ranges)
+	end
+end 
+
 function imgui.OnDrawFrame()
+	apply_custom_style()
 	if main_window.v then
-		apply_custom_style()
 		imgui.ShowCursor = true
-		imgui.SetNextWindowSize(imgui.ImVec2(1300, 800), imgui.Cond.FirstUseEver)
-		imgui.SetNextWindowPos(imgui.ImVec2(sw / 2 - 650, sh / 2 - 400))
-		imgui.Begin(u8"FastLink", main_window, imgui.WindowFlags.NoResize)
-		imgui.BeginChild("ssilki", imgui.ImVec2(1288, 95), true, imgui.WindowFlags.NoScrollbar)
-		if ssilka ~= nil then
-			imgui.PushFont(fontsize20)
-				ssilka = ssilka:gsub('{......}', '')
-				imgui.TextColoredRGB("{003399}Ссылка {000000}\"{355e3b}" .. ssilka .. "{000000}\"{003399}, была получена в {9400d3}" .. time1 .. " {003399}|")
-				imgui.SameLine()
-				if imgui.CustomButton(u8"   перейти   ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5)) then
-					os.execute("start " .. ssilka)
-					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Переходим {FFFF00}по ссылке...", main_color)
-				end
-				imgui.SameLine()
-				if imgui.CustomButton(u8"   скопировать   ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5)) then
-					setClipboardText(ssilka)
-					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Скопировано {FFFF00}в буфер обмена", main_color)
-				end
-			imgui.PopFont()
-		end
-		if ssilka2 ~= nil then
-			imgui.PushFont(fontsize20)
-				ssilka2 = ssilka2:gsub('{......}', '')
-				imgui.TextColoredRGB("{003399}Ссылка {000000}\"{355e3b}" .. ssilka2 .. "{000000}\"{003399}, была получена в {9400d3}" .. time2 .. " {003399}|")
-				imgui.SameLine()
-				if imgui.CustomButton(u8"   перейти    ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5)) then
-					os.execute("start " .. ssilka2)
-					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Переходим {FFFF00}по ссылке...", main_color)
-				end
-				imgui.SameLine()
-				if imgui.CustomButton(u8"   скопировать    ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5)) then
-					setClipboardText(ssilka2)
-					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Скопировано {FFFF00}в буфер обмена", main_color)
-				end
-			imgui.PopFont()
-		end
-		if ssilka3 ~= nil then
-			imgui.PushFont(fontsize20)
-				ssilka3 = ssilka3:gsub('{......}', '')
-				imgui.TextColoredRGB("{003399}Ссылка {000000}\"{355e3b}" .. ssilka3 .. "{000000}\"{003399}, была получена в {9400d3}" .. time3 .. " {003399}|")
-				imgui.SameLine()
-				if imgui.CustomButton(u8"   перейти     ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5))  then
-					os.execute("start " .. ssilka3)
-					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Переходим {FFFF00}по ссылке...", main_color)
-				end
-				imgui.SameLine()
-				if imgui.CustomButton(u8"   скопировать     ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5)) then
-					setClipboardText(ssilka3)
-					sampAddChatMessage(tag .. color_text .. "{FFFFFF}Скопировано {FFFF00}в буфер обмена", main_color)
-				end
-			imgui.PopFont()
-		end
-		if ssilka == nil and ssilka2 == nil and ssilka3 == nil then
-			imgui.PushFont(fontsize40)
-				imgui.TextColoredRGBCenter("{FF0000}в чате не было найдено ни одной ссылки!")
-			imgui.PopFont()
-		end
-		imgui.EndChild()
-		imgui.Separator()
-		if work then
-			imgui.PushFont(fontsize20)
-				if imgui.CustomButton(u8"   отключить поиск ссылок в чате   ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5)) then
-					work = false
-				end
-			imgui.PopFont()
-		else
-			imgui.PushFont(fontsize20)
-				if imgui.CustomButton(u8"   включить поиск ссылок в чате   ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5)) then
-					work = true
-				end
-			imgui.PopFont()
-		end
-		imgui.SameLine()
-		imgui.PushFont(fontsize20)
-			if imgui.CustomButton(u8"   проверить наличие обновлений   ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5))  then
-				updcheck()
-			end
-		imgui.PopFont()
-		imgui.SameLine()
-		imgui.PushFont(fontsize20)
-			if imgui.CustomButton(u8"   обновить   ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5))  then
-				upd()
-			end
-		imgui.PopFont()
-		imgui.Separator()
-		imgui.PushFont(fontsize20)
-			if imgui.HotKey("##1", activeKeys, tLastKeys, 120) then
-				rkeys.changeHotKey(bindKey, activeKeys.v)
-				flinke.cfg.bindKey = encodeJson(activeKeys.v)
-				inicfg.save(flinke, "flinke")
-			end
-			imgui.SameLine()
-			imgui.Text(u8"- Изменить клавишу перехода по ссылкам")
-			imgui.SameLine()
-			imgui.TextDisabled(u8"(сохраняется в конфиг)")
-			imgui.TextColoredRGB("{003399}Игнорировать {355e3b}клавишу {003399}если...")
-			imgui.SameLine()
-			imgui.TextDisabled(u8"(сохраняется в конфиг)")
-			if imgui.Checkbox(u8"- открыто окно чата;", check_chat) then
-				flinke.cfg.chatIgnore = check_chat.v
-				inicfg.save(flinke, "flinke")
-			end
-			imgui.SameLine()
-			if imgui.Checkbox(u8"- открыт таб;", check_tab) then
-				flinke.cfg.tabIgnore = check_tab.v
-				inicfg.save(flinke, "flinke")
-			end
-			imgui.SameLine()
-			if imgui.Checkbox(u8"- открыта консоль сампфункс;", check_console) then
-				flinke.cfg.consoleIgnore = check_console.v
-				inicfg.save(flinke, "flinke")
-			end
-			imgui.SameLine()
-			if imgui.Checkbox(u8"- активно диалоговое окно", check_dialog) then
-				flinke.cfg.dialogIgnore = check_dialog.v
-				inicfg.save(flinke, "flinke")
-			end
-			imgui.Separator()
-			imgui.TextColoredRGB("{003399}Показывать {355e3b}найденные {003399}ссылки через...")
-			imgui.SameLine()
-			imgui.TextDisabled(u8"(сохраняется в конфиг)")
-			if imgui.RadioButton(u8"чат", radio, 1) then
-				flinke.cfg.cimgui = false
-				flinke.cfg.cchat = true
-				inicfg.save(flinke, "flinke")
-			end
-			imgui.SameLine()
-			if imgui.CustomButton(u8"   проверить как будет выводить   ##1", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5))  then
-				sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
-				sampAddChatMessage(tag .. color_text .. "Ссылка: {FFFFFF}example-link.com/2281337", main_color)
-			end
-			if imgui.RadioButton(u8"дополнительное маленькое ImGui окно", radio, 2) then
-				flinke.cfg.cimgui = true
-				flinke.cfg.cchat = false
-				inicfg.save(flinke, "flinke")
-			end
-			imgui.SameLine()
-			if imgui.CustomButton(u8"   проверить как будет выводить   ##2", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5))  then
-				examplee()
-			end
-			if flinke.cfg.cimgui then
-				if imgui.CustomButton(u8"   изменить положение доп. окна на экране   ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5))  then
-					fcp()
-				end
-				imgui.SameLine()
-				if imgui.CustomButton(u8"   сбросить положение доп. окна на экране   ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5))  then
-					fcr()
+		imgui.SetNextWindowSize(imgui.ImVec2(1600, 363), imgui.Cond.FirstUseEver)
+		imgui.SetNextWindowPos(imgui.ImVec2(sw / 2 - 800, sh / 2 - 181.5))
+		imgui.Begin(u8"FastLink", main_window, imgui.WindowFlags.NoResize + imgui.WindowFlags.NoScrollbar + imgui.WindowFlags.NoScrollWithMouse)
+		imgui.PushFont(fontsize25)
+		imgui.Spacing()
+		imgui.BeginChild("Select", imgui.ImVec2(367, 334))
+			if menuSelected == 1 then
+				local r, g, b, a = imgui.ImColor(imgui.GetStyle().Colors[imgui.Col.Button]):GetFloat4()
+				imgui.PushStyleColor(imgui.Col.Button, imgui.ImVec4(r, g, b, a/2) )
+				imgui.PushStyleColor(imgui.Col.ButtonHovered, imgui.ImVec4(r, g, b, a/2))
+				imgui.PushStyleColor(imgui.Col.ButtonActive, imgui.ImVec4(r, g, b, a/2))
+				imgui.PushStyleColor(imgui.Col.Text, imgui.GetStyle().Colors[imgui.Col.TextDisabled])
+					imgui.Button(fa.ICON_FA_LINK .. u8" полученные ссылки", imgui.ImVec2(355, 35))
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+			else
+				if imgui.Button(fa.ICON_FA_LINK .. u8" полученные ссылки", imgui.ImVec2(355, 35)) then
+					menuSelected = 1
 				end
 			end
-			imgui.SameLine()
-			imgui.TextDisabled(u8"(сохраняется в конфиг)")
-			imgui.Separator()
-			if imgui.Checkbox(u8" - Воиспроизведение звука при нахождении ссылки", check_sound) then
-				flinke.cfg.checksound = check_sound.v
-				inicfg.save(flinke, "flinke")
-			end
-			imgui.SameLine()
-			imgui.TextDisabled(u8"(сохраняется в конфиг)")
-			imgui.Separator()
-			imgui.CenterText(u8"СИСТЕМА ИГНОРИРОВАНИЯ ССЫЛОК")
-			imgui.CenterTextDisabled(u8"(сохраняется в конфиг)")
-			imgui.PushItemWidth(600)
-				if imgui.InputText(u8"локальное игнорирование", local_text) then
-					local_text.v = local_text.v:gsub(' ', '')
-				end
-			imgui.PopItemWidth()
-			imgui.SameLine()
-			imgui.TextQuestion(u8"Данная функция отвечает за локальное игнорирование ссылок...\nПроще говоря скрипт будет игнорировать только определённые ссылки, пример:\nexample-link.com/2281337/\nexample-link.net/123/")
-			imgui.SameLine()
-			imgui.TextDisabled(u8"- наведи курсор на вопросик")
-			if imgui.CustomButton(u8"   добавить ссылку в локальное игнорирование   ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5))  then
-				if #local_text.v == 0 then
-					sampAddChatMessage(tag .. color_text .. "Поле для ввода {FFFFFF}пустое", main_color)
-				else
-					local i = 1
-					for _,v in ipairs(l) do
-						if local_text.v:match("%S+%." .. v .. "/%S+") then
-							if local_text.v:match("https://%S+%." .. v .. "/%S+") then
-								local asdasd1, asdasd2 = local_text.v:match("https://(%S+)%." .. v .. "(/%S+)")
-								local_text.v = asdasd1 .. "." .. v .. asdasd2
-							elseif local_text.v:match("http://%S+%." .. v .. "/%S+") then
-								local asdasd1, asdasd2 = local_text.v:match("http://(%S+)%." .. v .. "(/%S+)")
-								local_text.v = asdasd1 .. "." .. v .. asdasd2
-							elseif local_text.v:match("www%.%S+%." .. v .. "/%S+") then
-								local asdasd1, asdasd2 = local_text.v:match("www%.(%S+)%." .. v .. "(/%S+)")
-								local_text.v = asdasd1 .. "." .. v .. asdasd2
-							end
-							addtoignorelocal()
-							break
-						else
-							i = i + 1
-							if i == 275 then
-								sampAddChatMessage(tag .. color_text .. "Некорректная {FFFFFF}ссылка{FFFF00}!", main_color)
-								break
-							end
-						end
-					end
+			if menuSelected == 2 then
+				local r, g, b, a = imgui.ImColor(imgui.GetStyle().Colors[imgui.Col.Button]):GetFloat4()
+				imgui.PushStyleColor(imgui.Col.Button, imgui.ImVec4(r, g, b, a/2) )
+				imgui.PushStyleColor(imgui.Col.ButtonHovered, imgui.ImVec4(r, g, b, a/2))
+				imgui.PushStyleColor(imgui.Col.ButtonActive, imgui.ImVec4(r, g, b, a/2))
+				imgui.PushStyleColor(imgui.Col.Text, imgui.GetStyle().Colors[imgui.Col.TextDisabled])
+					imgui.Button(fa.ICON_FA_COG .. u8" параметры получения ссылок", imgui.ImVec2(355, 35))
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+			else
+				if imgui.Button(fa.ICON_FA_COG .. u8" параметры получения ссылок", imgui.ImVec2(355, 35)) then
+					menuSelected = 2
 				end
 			end
-			imgui.SameLine()
-			if imgui.CustomButton(u8"   удалить ссылку из локального игнорирования   ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5))  then
-				deleteignorelinklocal()
-			end
-			imgui.SameLine()
-			if imgui.CustomButton(u8"   посмотреть все ссылки в локальном игнорировании   ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5))  then
-				showignorelocal()
-			end
-			imgui.PushItemWidth(600)
-				if imgui.InputText(u8"глобальное игнорирование", global_text) then
-					global_text.v = global_text.v:gsub(' ', '')
-				end
-			imgui.PopItemWidth()
-			imgui.SameLine()
-			imgui.TextQuestion(u8"Данная функция отвечает за глобальное игнорирование ссылок...\nПроще говоря скрипт будет игнорировать все ссылки, пример:\nexample-link.com\nexample-link.net")
-			imgui.SameLine()
-			imgui.TextDisabled(u8"- наведи курсор на вопросик")
-			if imgui.CustomButton(u8"   добавить ссылку в глобальное игнорирование   ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5))  then
-				if #global_text.v == 0 then
-					sampAddChatMessage(tag .. color_text .. "Поле для ввода {FFFFFF}пустое", main_color)
-				else
-					local i = 1
-					for _,v in ipairs(l) do
-						if global_text.v:match("%S+%." .. v) then
-							if not global_text.v:match("%S+%." .. v .. "%S+") then
-								if global_text.v:match("https://%S+%." .. v) then
-									local asdasd = global_text.v:match("https://(%S+)%." .. v)
-									global_text.v = asdasd .. "." .. v
-								elseif global_text.v:match("http://%S+%." .. v) then
-									local asdasd = global_text.v:match("http://(%S+)%." .. v)
-									global_text.v = asdasd .. "." .. v
-								elseif global_text.v:match("www%.%S+%." .. v) then
-									local asdasd = global_text.v:match("www%.(%S+)%." .. v)
-									global_text.v = asdasd .. "." .. v
-								end
-								addtoignoreglobal()
-								break
-							else
-								i = i + 1
-								if i == 275 then
-									sampAddChatMessage(tag .. color_text .. "Некорректная {FFFFFF}ссылка{FFFF00}!", main_color)
-									break
-								end
-							end
-						else
-							i = i + 1
-							if i == 275 then
-								sampAddChatMessage(tag .. color_text .. "Некорректная {FFFFFF}ссылка{FFFF00}!", main_color)
-								break
-							end
-						end
-					end
+			if menuSelected == 3 then
+				local r, g, b, a = imgui.ImColor(imgui.GetStyle().Colors[imgui.Col.Button]):GetFloat4()
+				imgui.PushStyleColor(imgui.Col.Button, imgui.ImVec4(r, g, b, a/2) )
+				imgui.PushStyleColor(imgui.Col.ButtonHovered, imgui.ImVec4(r, g, b, a/2))
+				imgui.PushStyleColor(imgui.Col.ButtonActive, imgui.ImVec4(r, g, b, a/2))
+				imgui.PushStyleColor(imgui.Col.Text, imgui.GetStyle().Colors[imgui.Col.TextDisabled])
+					imgui.Button(fa.ICON_FA_KEYBOARD .. u8" настройки бинда", imgui.ImVec2(355, 35))
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+			else
+				if imgui.Button(fa.ICON_FA_KEYBOARD .. u8" настройки бинда", imgui.ImVec2(355, 35)) then
+					menuSelected = 3
 				end
 			end
-			imgui.SameLine()
-			if imgui.CustomButton(u8"   удалить ссылку из глобального игнорирования   ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(0.00, 0.49, 1.00, 0.5))  then
-				deleteignorelinkglobal()
-			end
-			imgui.SameLine()
-			if imgui.CustomButton(u8"   посмотреть все ссылки в глобальном игнорировании   ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5))  then
-				showignoreglobal()
-			end
-			imgui.Spacing()
-			imgui.Separator()
-			imgui.Spacing()
-			if imgui.CustomButton(u8"   удалить все ссылки из локального игнорирования   ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5))  then
-				deletealllocal()
-			end
-			imgui.SameLine()
-			if imgui.CustomButton(u8"   удалить все ссылки из глобального игнорирования   ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5))  then
-				deleteallglobal()
-			end
-			imgui.Separator()
-			if imgui.CustomButton(u8"   информация о скрипте   ", imgui.ImVec4(a1, b1, c1, 0.7), imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5))  then
-				info()
-			end
-			imgui.SameLine()
-			if imgui.CustomButton(u8"   история обновлений   ", imgui.ImVec4(a1, b1, c1, 0.7),  imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5))  then
-				history()
-			end
-			imgui.Separator()
-			imgui.Spacing()
-			imgui.PushItemWidth(300)
-			if imgui.ColorEdit3(u8'- Изменить цвет стиля', color) then
-				local clr = join_argb(0, color.v[1] * 255, color.v[2] * 255, color.v[3] * 255)
-				a1 = string.format('%.2f', color.v[1])
-				b1 = string.format('%.2f', color.v[2])
-				c1 = string.format('%.2f', color.v[3])
-				d1 = ('%06X'):format(clr)
-				changeColor = true
-				local style = imgui.GetStyle()
-				local colors = style.Colors
-				local clr = imgui.Col
-				local ImVec4 = imgui.ImVec4
-				colors[clr.CheckMark] = ImVec4(a1, b1, c1, 0.97)
-			end
-			imgui.PopItemWidth()
-			imgui.SameLine()
-			imgui.Text("|")
-			imgui.SameLine()
-			if imgui.CustomButton(u8"   сохранить новый стиль в конфиг   ", imgui.ImVec4(a1, b1, c1, 0.7),  imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5))  then
-				if changeColor then
-					sampAddChatMessage(tag .. color_text .. "Новый {" .. d1 .. "}СТИЛЬ {FFFF00}успешно {FFFFFF}сохранен {FFFF00}в конфиг", main_color)
-					flinke.cfg.color1 = a1
-					flinke.cfg.color2 = b1
-					flinke.cfg.color3 = c1
-					inicfg.save(flinke, "flinke")
-				else
-					sampAddChatMessage(tag .. color_text .. "Сначала необходимо {FFFFFF}изменить {FFFF00}цвет", main_color)
+			if menuSelected == 4 then
+				local r, g, b, a = imgui.ImColor(imgui.GetStyle().Colors[imgui.Col.Button]):GetFloat4()
+				imgui.PushStyleColor(imgui.Col.Button, imgui.ImVec4(r, g, b, a/2) )
+				imgui.PushStyleColor(imgui.Col.ButtonHovered, imgui.ImVec4(r, g, b, a/2))
+				imgui.PushStyleColor(imgui.Col.ButtonActive, imgui.ImVec4(r, g, b, a/2))
+				imgui.PushStyleColor(imgui.Col.Text, imgui.GetStyle().Colors[imgui.Col.TextDisabled])
+					imgui.Button(fa.ICON_FA_BAN .. u8" система игнорирования ссылок", imgui.ImVec2(355, 35))
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+			else
+				if imgui.Button(fa.ICON_FA_BAN .. u8" система игнорирования ссылок", imgui.ImVec2(355, 35)) then
+					menuSelected = 4
 				end
 			end
-			imgui.SameLine()
-			if imgui.CustomButton(u8"   сбросить до стиля по умолчанию   ", imgui.ImVec4(a1, b1, c1, 0.7),  imgui.ImVec4(a1, b1, c1, 1.00), imgui.ImVec4(a1, b1, c1, 0.5))  then
-				sampAddChatMessage(tag .. color_text .. "Стиль сброшен до состояния по умолчанию и{FFFF00}успешно {FFFFFF}сохранен {FFFF00}в конфиг", main_color)
-				flinke.cfg.color1 = 0.00
-				flinke.cfg.color2 = 0.49
-				flinke.cfg.color3 = 1.00
-				a1 = 0.00
-				b1 = 0.49
-				c1 = 1.00
-				color = imgui.ImFloat3(a1, b1, c1)
-				inicfg.save(flinke, "flinke")
+			if menuSelected == 5 then
+				local r, g, b, a = imgui.ImColor(imgui.GetStyle().Colors[imgui.Col.Button]):GetFloat4()
+				imgui.PushStyleColor(imgui.Col.Button, imgui.ImVec4(r, g, b, a/2) )
+				imgui.PushStyleColor(imgui.Col.ButtonHovered, imgui.ImVec4(r, g, b, a/2))
+				imgui.PushStyleColor(imgui.Col.ButtonActive, imgui.ImVec4(r, g, b, a/2))
+				imgui.PushStyleColor(imgui.Col.Text, imgui.GetStyle().Colors[imgui.Col.TextDisabled])
+					imgui.Button(fa.ICON_FA_PALETTE .. u8" кастомизация интерфейса", imgui.ImVec2(355, 35))
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+			else
+				if imgui.Button(fa.ICON_FA_PALETTE .. u8" кастомизация интерфейса", imgui.ImVec2(355, 35)) then
+					menuSelected = 5
+				end
 			end
-			imgui.Separator()
-			imgui.Spacing()
+			if menuSelected == 6 then
+				local r, g, b, a = imgui.ImColor(imgui.GetStyle().Colors[imgui.Col.Button]):GetFloat4()
+				imgui.PushStyleColor(imgui.Col.Button, imgui.ImVec4(r, g, b, a/2) )
+				imgui.PushStyleColor(imgui.Col.ButtonHovered, imgui.ImVec4(r, g, b, a/2))
+				imgui.PushStyleColor(imgui.Col.ButtonActive, imgui.ImVec4(r, g, b, a/2))
+				imgui.PushStyleColor(imgui.Col.Text, imgui.GetStyle().Colors[imgui.Col.TextDisabled])
+					imgui.Button(fa.ICON_FA_FOLDER_PLUS .. u8" обновления", imgui.ImVec2(355, 35))
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+			else
+				if imgui.Button(fa.ICON_FA_FOLDER_PLUS .. u8" обновления", imgui.ImVec2(355, 35)) then
+					menuSelected = 6
+				end
+			end
+			if menuSelected == 7 then
+				local r, g, b, a = imgui.ImColor(imgui.GetStyle().Colors[imgui.Col.Button]):GetFloat4()
+				imgui.PushStyleColor(imgui.Col.Button, imgui.ImVec4(r, g, b, a/2) )
+				imgui.PushStyleColor(imgui.Col.ButtonHovered, imgui.ImVec4(r, g, b, a/2))
+				imgui.PushStyleColor(imgui.Col.ButtonActive, imgui.ImVec4(r, g, b, a/2))
+				imgui.PushStyleColor(imgui.Col.Text, imgui.GetStyle().Colors[imgui.Col.TextDisabled])
+					imgui.Button(fa.ICON_FA_INFO_CIRCLE .. u8" информация о скрипте", imgui.ImVec2(355, 35))
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+				imgui.PopStyleColor()
+			else
+				if imgui.Button(fa.ICON_FA_INFO_CIRCLE .. u8" информация о скрипте", imgui.ImVec2(355, 35)) then
+					menuSelected = 7
+				end
+			end
 			if theme == 1 then
 				local style = imgui.GetStyle()
 				local colors = style.Colors
 				local clr = imgui.Col
 				local ImVec4 = imgui.ImVec4
 				colors[clr.Text] = ImVec4(1.00, 1.00, 1.00, 1.00)
-				if imgui.CustomButton(u8"   перейти на тёмную тему   ", imgui.ImVec4(0.00, 0.00, 0.00, 0.95),  imgui.ImVec4(0.00, 0.00, 0.00, 1.00), imgui.ImVec4(0.00, 0.00, 0.00, 0.8), imgui.ImVec2(1288, 30))  then
+				if imgui.CustomButton(fa.ICON_FA_BRUSH .. u8" перейти на тёмную тему", imgui.ImVec4(0.00, 0.00, 0.00, 0.95),  imgui.ImVec4(0.00, 0.00, 0.00, 1.00), imgui.ImVec4(0.00, 0.00, 0.00, 0.8), imgui.ImVec2(355, 35))  then
 					theme = 2
 					flinke.cfg.theme = theme
 					inicfg.save(flinke, "flinke")
 				end
+				colors[clr.Text] = ImVec4(0.00, 0.00, 0.00, 1.00)
 			elseif theme == 2 then
 				local style = imgui.GetStyle()
 				local colors = style.Colors
 				local clr = imgui.Col
 				local ImVec4 = imgui.ImVec4
 				colors[clr.Text] = ImVec4(0.00, 0.00, 0.00, 1.00)
-				if imgui.CustomButton(u8"   перейти на светлую тему   ", imgui.ImVec4(1.00, 1.00, 1.00, 0.8),  imgui.ImVec4(1.00, 1.00, 1.00, 1.00), imgui.ImVec4(1.00, 1.00, 1.00, 0.40), imgui.ImVec2(1288, 30))  then
+				if imgui.CustomButton(fa.ICON_FA_BRUSH .. u8" перейти на светлую тему", imgui.ImVec4(1.00, 1.00, 1.00, 0.8),  imgui.ImVec4(1.00, 1.00, 1.00, 1.00), imgui.ImVec4(1.00, 1.00, 1.00, 0.40), imgui.ImVec2(355, 35))  then
 					theme = 1
 					flinke.cfg.theme = theme
 					inicfg.save(flinke, "flinke")
 				end
+				colors[clr.Text] = ImVec4(1.00, 1.00, 1.00, 1.00)
 			end
+			imgui.Spacing()
+		imgui.EndChild()
 		imgui.PopFont()
+		imgui.SameLine()
+		imgui.VerticalSeparator()
+		imgui.Spacing()
+		if menuSelected == 1 then
+			imgui.SameLine()
+			imgui.Spacing()
+			imgui.SameLine()
+			imgui.BeginChild("Links", imgui.ImVec2(1183, 90), true, imgui.WindowFlags.NoScrollbar)
+			if ssilka ~= nil then
+				imgui.PushFont(fontsize20)
+					ssilka = ssilka:gsub('{......}', '')
+					if theme == 1 then
+						imgui.TextColoredRGB("{003399}Ссылка {000000}\"{355e3b}" .. ssilka .. "{000000}\"{003399}, была получена в {9400d3}" .. time1 .. " {003399}|")
+					elseif theme == 2 then
+						imgui.TextColoredRGB("{003399}Ссылка {FFFFFF}\"{355e3b}" .. ssilka .. "{FFFFFF}\"{003399}, была получена в {9400d3}" .. time1 .. " {003399}|")
+					end
+					imgui.SameLine()
+				imgui.PopFont()
+				imgui.PushFont(fontsize18)
+					if imgui.Button(fa.ICON_FA_GLOBE .. u8" перейти ##3", imgui.ImVec2(90, 23)) then
+						os.execute("start " .. ssilka)
+						sampAddChatMessage(tag .. color_text .. "{FFFFFF}Переходим {FFFF00}по ссылке...", main_color)
+					end
+					imgui.SameLine()
+					if imgui.Button(fa.ICON_FA_COPY .. u8" скопировать ##3", imgui.ImVec2(115, 23)) then
+						setClipboardText(ssilka)
+						sampAddChatMessage(tag .. color_text .. "{FFFFFF}Скопировано {FFFF00}в буфер обмена", main_color)
+					end
+				imgui.PopFont()
+			end
+			if ssilka2 ~= nil then
+				imgui.PushFont(fontsize20)
+					ssilka2 = ssilka2:gsub('{......}', '')
+					if theme == 1 then
+						imgui.TextColoredRGB("{003399}Ссылка {000000}\"{355e3b}" .. ssilka2 .. "{000000}\"{003399}, была получена в {9400d3}" .. time2 .. " {003399}|")
+					elseif theme == 2 then
+						imgui.TextColoredRGB("{003399}Ссылка {FFFFFF}\"{355e3b}" .. ssilka2 .. "{FFFFFF}\"{003399}, была получена в {9400d3}" .. time2 .. " {003399}|")
+					end
+					imgui.SameLine()
+				imgui.PopFont()
+				imgui.PushFont(fontsize18)
+					if imgui.Button(fa.ICON_FA_GLOBE .. u8" перейти ##2", imgui.ImVec2(90, 23)) then
+						os.execute("start " .. ssilka2)
+						sampAddChatMessage(tag .. color_text .. "{FFFFFF}Переходим {FFFF00}по ссылке...", main_color)
+					end
+					imgui.SameLine()
+					if imgui.Button(fa.ICON_FA_COPY .. u8" скопировать ##2", imgui.ImVec2(115, 23)) then
+						setClipboardText(ssilka2)
+						sampAddChatMessage(tag .. color_text .. "{FFFFFF}Скопировано {FFFF00}в буфер обмена", main_color)
+					end
+				imgui.PopFont()
+			end
+			if ssilka3 ~= nil then
+				imgui.PushFont(fontsize20)
+					ssilka3 = ssilka3:gsub('{......}', '')
+					if theme == 1 then
+						imgui.TextColoredRGB("{003399}Ссылка {000000}\"{355e3b}" .. ssilka3 .. "{000000}\"{003399}, была получена в {9400d3}" .. time3 .. " {003399}|")
+					elseif theme == 2 then
+						imgui.TextColoredRGB("{003399}Ссылка {FFFFFF}\"{355e3b}" .. ssilka3 .. "{FFFFFF}\"{003399}, была получена в {9400d3}" .. time3 .. " {003399}|")
+					end
+					imgui.SameLine()
+				imgui.PopFont()
+				imgui.PushFont(fontsize18)
+					if imgui.Button(fa.ICON_FA_GLOBE .. u8" перейти ##1", imgui.ImVec2(90, 23)) then
+						os.execute("start " .. ssilka3)
+						sampAddChatMessage(tag .. color_text .. "{FFFFFF}Переходим {FFFF00}по ссылке...", main_color)
+					end
+					imgui.SameLine()
+					if imgui.Button(fa.ICON_FA_COPY .. u8" скопировать ##1", imgui.ImVec2(115, 23)) then
+						setClipboardText(ssilka3)
+						sampAddChatMessage(tag .. color_text .. "{FFFFFF}Скопировано {FFFF00}в буфер обмена", main_color)
+					end
+				imgui.PopFont()
+			end
+			if ssilka == nil and ssilka2 == nil and ssilka3 == nil then
+				imgui.PushFont(fontsize40)
+					imgui.TextColoredRGBCenter("{FF0000}в чате не было найдено ни одной ссылки!")
+				imgui.PopFont()
+			end
+			imgui.EndChild()
+		end
+		if menuSelected == 2 then
+			imgui.SameLine()
+			imgui.Spacing()
+			imgui.SameLine()
+			imgui.BeginChild("Params", imgui.ImVec2(1183, 323), true, imgui.WindowFlags.NoScrollbar)
+				if work then
+					imgui.PushFont(fontsize25)
+						if imgui.Button(fa.ICON_FA_POWER_OFF .. u8" отключить поиск ссылок в чате", imgui.ImVec2(1168, 35)) then
+							work = false
+						end
+					imgui.PopFont()
+				else
+					imgui.PushFont(fontsize25)
+						if imgui.Button(fa.ICON_FA_TOGGLE_ON .. u8" включить поиск ссылок в чате", imgui.ImVec2(1168, 35)) then
+							work = true
+						end
+					imgui.PopFont()
+				end
+				imgui.PushFont(fontsize25)
+					imgui.TextColoredRGB("{003399}Показывать {355e3b}найденные {003399}ссылки через...")
+					imgui.SameLine()
+					imgui.Spacing()
+					imgui.Spacing()
+				imgui.PopFont()
+				imgui.PushFont(fontsize20)
+					if imgui.RadioButton(u8"чат", radio, 1) then
+						flinke.cfg.cimgui = false
+						flinke.cfg.cchat = true
+						inicfg.save(flinke, "flinke")
+					end
+					if imgui.RadioButton(u8"дополнительное маленькое ImGui окно", radio, 2) then
+						flinke.cfg.cimgui = true
+						flinke.cfg.cchat = false
+						inicfg.save(flinke, "flinke")
+					end
+				imgui.PopFont()
+				imgui.PushFont(fontsize25)
+					if flinke.cfg.cimgui then
+						if imgui.Button(fa.ICON_FA_ARROWS_ALT .. u8" изменить местоположение доп. окна на экране", imgui.ImVec2(578, 35)) then
+							fcp()
+						end
+						imgui.SameLine()
+						if imgui.Button(fa.ICON_FA_EJECT .. u8" сбросить местоположение доп. окна на экране", imgui.ImVec2(578, 35)) then
+							fcr()
+						end
+					end
+					if imgui.Button(fa.ICON_FA_COMMENT .. u8" проверить вывод ссылок", imgui.ImVec2(1168, 35)) then
+						if flinke.cfg.cchat then
+							sampAddChatMessage(tag .. color_text .. "В чате была {FFFFFF}найдена {FFFF00}новая ссылка. Для перехода: клавиша{FFFFFF} F2{FFFF00}, либо команда {FFFFFF}/flink", main_color)
+							sampAddChatMessage(tag .. color_text .. "Ссылка: {FFFFFF}example-link.com/2281337", main_color)
+						elseif flinke.cfg.cimgui then
+							examplee()
+						end
+					end
+				imgui.PopFont()
+				imgui.PushFont(fontsize20)
+					imgui.Spacing()
+					imgui.Spacing()
+					imgui.SameLine()
+					imgui.Separator()
+					imgui.Spacing()
+					if imgui.Checkbox(u8" - Воиспроизводить звук когда ссылка была найдена", check_sound) then
+						flinke.cfg.checksound = check_sound.v
+						inicfg.save(flinke, "flinke")
+					end
+					imgui.SameLine()
+				imgui.PopFont()
+			imgui.EndChild()
+		end
+		if menuSelected == 3 then
+			imgui.SameLine()
+			imgui.Spacing()
+			imgui.SameLine()
+			imgui.BeginChild("Bind", imgui.ImVec2(1183, 323), true, imgui.WindowFlags.NoScrollbar)
+				imgui.PushFont(fontsize20)
+					if imgui.HotKey("##1", activeKeys, tLastKeys, 120) then
+						rkeys.changeHotKey(bindKey, activeKeys.v)
+						flinke.cfg.bindKey = encodeJson(activeKeys.v)
+						inicfg.save(flinke, "flinke")
+					end
+					imgui.SameLine()
+					imgui.Text(u8"- Изменить клавишу перехода по ссылкам")
+				imgui.PopFont()
+				imgui.Separator()
+				imgui.PushFont(fontsize25)
+					imgui.TextColoredRGB("{003399}Игнорировать {355e3b}клавишу {003399}если...")
+				imgui.PopFont()
+				imgui.PushFont(fontsize20)
+					if imgui.Checkbox(u8"- открыто окно чата;", check_chat) then
+						flinke.cfg.chatIgnore = check_chat.v
+						inicfg.save(flinke, "flinke")
+					end
+					if imgui.Checkbox(u8"- открыт таб;", check_tab) then
+						flinke.cfg.tabIgnore = check_tab.v
+						inicfg.save(flinke, "flinke")
+					end
+					if imgui.Checkbox(u8"- открыта консоль сампфункс;", check_console) then
+						flinke.cfg.consoleIgnore = check_console.v
+						inicfg.save(flinke, "flinke")
+					end
+					if imgui.Checkbox(u8"- активно диалоговое окно", check_dialog) then
+						flinke.cfg.dialogIgnore = check_dialog.v
+						inicfg.save(flinke, "flinke")
+					end
+				imgui.PopFont()
+			imgui.EndChild()
+		end
+		if menuSelected == 4 then
+			imgui.SameLine()
+			imgui.Spacing()
+			imgui.SameLine()
+			imgui.BeginChild("IgnoreLinks", imgui.ImVec2(1183, 323), true, imgui.WindowFlags.NoScrollbar)
+				imgui.PushFont(fontsize20)
+					imgui.PushItemWidth(600)
+					if imgui.InputText(u8"локальное игнорирование", local_text) then
+						local_text.v = local_text.v:gsub(' ', '')
+					end
+					imgui.PopItemWidth()
+					imgui.SameLine()
+					imgui.TextQuestion(u8"Данная функция отвечает за локальное игнорирование ссылок...\nПроще говоря скрипт будет игнорировать только определённые ссылки, пример:\nexample-link.com/2281337/\nexample-link.net/123/")
+					imgui.SameLine()
+					imgui.TextDisabled(u8"- наведи курсор на вопросик")
+				imgui.PopFont()
+				imgui.PushFont(fontsize25)
+					if imgui.Button(fa.ICON_FA_PLUS_SQUARE .. u8" добавить ссылку в локальное игнорирование", imgui.ImVec2(578, 35)) then
+						if #local_text.v == 0 then
+							sampAddChatMessage(tag .. color_text .. "Поле для ввода {FFFFFF}пустое", main_color)
+						else
+							local i = 1
+							for _,v in ipairs(l) do
+								if local_text.v:match("%S+%." .. v .. "/%S+") then
+									if local_text.v:match("https://%S+%." .. v .. "/%S+") then
+										local asdasd1, asdasd2 = local_text.v:match("https://(%S+)%." .. v .. "(/%S+)")
+										local_text.v = asdasd1 .. "." .. v .. asdasd2
+									elseif local_text.v:match("http://%S+%." .. v .. "/%S+") then
+										local asdasd1, asdasd2 = local_text.v:match("http://(%S+)%." .. v .. "(/%S+)")
+										local_text.v = asdasd1 .. "." .. v .. asdasd2
+									elseif local_text.v:match("www%.%S+%." .. v .. "/%S+") then
+										local asdasd1, asdasd2 = local_text.v:match("www%.(%S+)%." .. v .. "(/%S+)")
+										local_text.v = asdasd1 .. "." .. v .. asdasd2
+									end
+									addtoignorelocal()
+									break
+								else
+									i = i + 1
+									if i == 275 then
+										sampAddChatMessage(tag .. color_text .. "Некорректная {FFFFFF}ссылка{FFFF00}!", main_color)
+										break
+									end
+								end
+							end
+						end
+					end
+					imgui.SameLine()
+					if imgui.Button(fa.ICON_FA_MINUS_SQUARE .. u8" удалить ссылку из локального игнорирования", imgui.ImVec2(578, 35)) then
+						deleteignorelinklocal()
+					end
+					if imgui.Button(fa.ICON_FA_EYE .. u8" посмотреть все ссылки в локальном игнорировании", imgui.ImVec2(1168, 35)) then
+						showignorelocal()
+					end
+				imgui.PopFont()
+				imgui.PushFont(fontsize20)
+					imgui.PushItemWidth(600)
+						if imgui.InputText(u8"глобальное игнорирование", global_text) then
+							global_text.v = global_text.v:gsub(' ', '')
+						end
+					imgui.PopItemWidth()
+					imgui.SameLine()
+					imgui.TextQuestion(u8"Данная функция отвечает за глобальное игнорирование ссылок...\nПроще говоря скрипт будет игнорировать все ссылки, пример:\nexample-link.com\nexample-link.net")
+					imgui.SameLine()
+					imgui.TextDisabled(u8"- наведи курсор на вопросик")
+				imgui.PopFont()
+				imgui.PushFont(fontsize25)
+					if imgui.Button(fa.ICON_FA_PLUS_SQUARE .. u8" добавить ссылку в глобальное игнорирование", imgui.ImVec2(578, 35)) then
+						if #global_text.v == 0 then
+							sampAddChatMessage(tag .. color_text .. "Поле для ввода {FFFFFF}пустое", main_color)
+						else
+							local i = 1
+							for _,v in ipairs(l) do
+								if global_text.v:match("%S+%." .. v) then
+									if not global_text.v:match("%S+%." .. v .. "%S+") then
+										if global_text.v:match("https://%S+%." .. v) then
+											local asdasd = global_text.v:match("https://(%S+)%." .. v)
+											global_text.v = asdasd .. "." .. v
+										elseif global_text.v:match("http://%S+%." .. v) then
+											local asdasd = global_text.v:match("http://(%S+)%." .. v)
+											global_text.v = asdasd .. "." .. v
+										elseif global_text.v:match("www%.%S+%." .. v) then
+											local asdasd = global_text.v:match("www%.(%S+)%." .. v)
+											global_text.v = asdasd .. "." .. v
+										end
+										addtoignoreglobal()
+										break
+									else
+										i = i + 1
+										if i == 275 then
+											sampAddChatMessage(tag .. color_text .. "Некорректная {FFFFFF}ссылка{FFFF00}!", main_color)
+											break
+										end
+									end
+								else
+									i = i + 1
+									if i == 275 then
+										sampAddChatMessage(tag .. color_text .. "Некорректная {FFFFFF}ссылка{FFFF00}!", main_color)
+										break
+									end
+								end
+							end
+						end
+					end
+					imgui.SameLine()
+					if imgui.Button(fa.ICON_FA_MINUS_SQUARE .. u8" удалить ссылку из глобального игнорирования", imgui.ImVec2(578, 35)) then
+						deleteignorelinkglobal()
+					end
+					if imgui.Button(fa.ICON_FA_EYE .. u8" посмотреть все ссылки в глобальном игнорировании", imgui.ImVec2(1168, 35)) then
+						showignoreglobal()
+					end
+					imgui.Spacing()
+					imgui.Separator()
+					imgui.Spacing()
+					if imgui.Button(fa.ICON_FA_MINUS_SQUARE .. u8" удалить все ссылки из локального игнорирования", imgui.ImVec2(578, 35)) then
+						deletealllocal()
+					end
+					imgui.SameLine()
+					if imgui.Button(fa.ICON_FA_MINUS_SQUARE .. u8" удалить все ссылки из глобального игнорирования", imgui.ImVec2(578, 35)) then
+						deleteallglobal()
+					end
+				imgui.PopFont()
+			imgui.EndChild()
+		end
+		if menuSelected == 5 then
+			imgui.SameLine()
+			imgui.Spacing()
+			imgui.SameLine()
+			imgui.BeginChild("Customization", imgui.ImVec2(1183, 323), true, imgui.WindowFlags.NoScrollbar)
+				imgui.PushFont(fontsize20)
+					imgui.PushItemWidth(400)
+					if imgui.ColorEdit3(u8'- Изменить цвет стиля', color) then
+						local clr = join_argb(0, color.v[1] * 255, color.v[2] * 255, color.v[3] * 255)
+						a1 = string.format('%.2f', color.v[1])
+						b1 = string.format('%.2f', color.v[2])
+						c1 = string.format('%.2f', color.v[3])
+						d1 = ('%06X'):format(clr)
+						d1 = "{" .. d1 .. "}"
+						changeColor = true
+						local style = imgui.GetStyle()
+						local colors = style.Colors
+						local clr = imgui.Col
+						local ImVec4 = imgui.ImVec4
+						colors[clr.CheckMark] = ImVec4(a1, b1, c1, 0.97)
+					end
+					imgui.PopItemWidth()
+				imgui.PopFont()
+				imgui.PushFont(fontsize25)
+					if imgui.Button(fa.ICON_FA_SAVE .. u8" сохранить новый стиль в конфиг", imgui.ImVec2(1168, 35)) then
+						if changeColor then
+							sampAddChatMessage(tag .. color_text .. "Новый " .. d1 .. "СТИЛЬ {FFFF00}успешно {FFFFFF}сохранен {FFFF00}в конфиг", main_color)
+							flinke.cfg.color1 = a1
+							flinke.cfg.color2 = b1
+							flinke.cfg.color3 = c1
+							inicfg.save(flinke, "flinke")
+						else
+							sampAddChatMessage(tag .. color_text .. "Сначала необходимо {FFFFFF}изменить {FFFF00}цвет", main_color)
+						end
+					end
+					if imgui.Button(fa.ICON_FA_EJECT .. u8" сбросить до стиля по умолчанию", imgui.ImVec2(1168, 35)) then
+						sampAddChatMessage(tag .. color_text .. "Стиль сброшен до состояния по умолчанию и{FFFF00} успешно {FFFFFF}сохранен {FFFF00}в конфиг", main_color)
+						flinke.cfg.color1 = 0.00
+						flinke.cfg.color2 = 0.49
+						flinke.cfg.color3 = 1.00
+						a1 = 0.00
+						b1 = 0.49
+						c1 = 1.00
+						local clr = join_argb(0, a1 * 255, b1 * 255, c1 * 255)
+						d1 = ('%06X'):format(clr)
+						d1 = "{" .. d1 .. "}"
+						color = imgui.ImFloat3(a1, b1, c1)
+						inicfg.save(flinke, "flinke")
+					end
+				imgui.PopFont()
+			imgui.EndChild()
+		end
+		if menuSelected == 6 then
+			imgui.SameLine()
+			imgui.Spacing()
+			imgui.SameLine()
+			imgui.BeginChild("UpdateMN", imgui.ImVec2(1183, 323), true, imgui.WindowFlags.NoScrollbar)
+				imgui.PushFont(fontsize25)
+					if imgui.Button(fa.ICON_FA_CLOUD_UPLOAD_ALT .. u8" проверить наличие обновлений", imgui.ImVec2(1168, 35)) then
+						updcheck()
+					end
+					if imgui.Button(fa.ICON_FA_DOWNLOAD .. u8" обновить", imgui.ImVec2(1168, 35)) then
+						upd()
+					end
+					if imgui.Button(fa.ICON_FA_HISTORY .. u8" история обновлений", imgui.ImVec2(1168, 35)) then
+						history()
+					end
+				imgui.PopFont()
+			imgui.EndChild()
+		end
+		if menuSelected == 7 then
+			imgui.SameLine()
+			imgui.Spacing()
+			imgui.SameLine()
+			imgui.BeginChild("InfoOfScript", imgui.ImVec2(1183, 323), true, imgui.WindowFlags.NoScrollbar)
+				imgui.PushFont(fontsize20)
+					if theme == 1 then
+						if page == 1 then
+							imgui.TextColoredRGB("" .. d1 .. "Скрипт {000000}FastLink " .. d1 .. "был создан для удобной ловли ссылок из чата и для быстрого перехода по ним. " .. d1 .. "Как только в чате появится полная ссылка в формате \n{000000}https://ссылка" .. d1 .. " либо {000000}http://ссылка" .. d1 .. ", скрипт {000000}отправит " .. d1 .. "специальное сообщение и {000000}предложит " .. d1 .. "перейти по найденной ссылке. Так же скрипт может\n" .. d1 .. "среагировать и на обычные короткие ссылки по типу {000000}google.com/123/" .. d1 .. ", но список доменов ограничен, сейчас это:\n{000000}." .. table.concat(l,", .", 1, 25) .. "\n{000000}." .. table.concat(l,", .", 26, 58) .. "\n{000000}." .. table.concat(l,", .", 58, 91) .. "\n{000000}." .. table.concat(l,", .", 92, 126) .. "\n{000000}." .. table.concat(l,", .", 127, 162) .. "\n{000000}." .. table.concat(l,", .", 163, 195) .. "\n{000000}." .. table.concat(l,", .", 196, 230) .. "\n{000000}." .. table.concat(l,", .", 231, 264) .. "\n{000000}." .. table.concat(l,", .", 265, 274))
+							imgui.SameLine()
+							if imgui.Button(fa.ICON_FA_FORWARD .. u8" следующая страница", imgui.ImVec2(205, 25)) then
+								page = 2
+							end
+						elseif page == 2 then
+							imgui.TextColoredRGB("" .. d1 .. "Чтобы скрипт прекратил/начал отлавливать ссылки в чате (по умолчанию вкл), достаточно ввести команду: {000000}/flinkwork\n" .. d1 .. "Чтобы проверить наличие {000000}обновлений" .. d1 .. " скрипта, достаточно ввести {000000}/flinkupdcheck\n" .. d1 .. "Чтобы открыть историю {000000}обновлений" .. d1 .. " скрипта, достаточно ввести {000000}/flinkupdhistory\n" .. d1 .. "В скрипте имеется имгуи окно с тремя {000000}последними " .. d1 .. "найденными ссылками. Для активации окна: {000000}/flinkmn\n" .. d1 .. "Автор скрипта: {000000}https://vk.com/klamet1/" .. d1 .. ". Если вы нашли какой либо {000000}баг" .. d1 .. ", просто хотите выразить\n{000000}благодарность" .. d1 .. " или заказать какой либо {000000}скрипт" .. d1 .. ", вы можете это сделать во {000000}ВКонтакте\n" .. d1 .. "Также автор принимает и {000000}материальную благодарность" .. d1 .. ". Вы можете оформить перевод средств на мой {000000}QIWI\n" .. d1 .. "кошелек по {000000}никнейму" .. d1 .. ", мой никнейм в {000000}QIWI" .. d1 .. " кошельке: {000000}HADIV201" .. d1 .. ".\n{000000}Спасибо " .. d1 .. "за использование моего скрипта. {000000}Надеюсь" .. d1 .. ", что данный скрипт будет нести только пользу.")
+							imgui.SameLine()
+							if imgui.Button(fa.ICON_FA_BACKWARD .. u8" предыдущая страница", imgui.ImVec2(205, 25)) then
+								page = 1
+							end
+						end
+					elseif theme == 2 then
+						if page == 1 then
+							imgui.TextColoredRGB("" .. d1 .. "Скрипт {FFFFFF}FastLink " .. d1 .. "был создан для удобной ловли ссылок из чата и для быстрого перехода по ним. " .. d1 .. "Как только в чате появится полная ссылка в формате \n{FFFFFF}https://ссылка" .. d1 .. " либо {FFFFFF}http://ссылка" .. d1 .. ", скрипт {FFFFFF}отправит " .. d1 .. "специальное сообщение и {FFFFFF}предложит " .. d1 .. "перейти по найденной ссылке. Так же скрипт может\n" .. d1 .. "среагировать и на обычные короткие ссылки по типу {FFFFFF}google.com/123/" .. d1 .. ", но список доменов ограничен, сейчас это:\n{FFFFFF}." .. table.concat(l,", .", 1, 25) .. "\n{FFFFFF}." .. table.concat(l,", .", 26, 58) .. "\n{FFFFFF}." .. table.concat(l,", .", 58, 91) .. "\n{FFFFFF}." .. table.concat(l,", .", 92, 126) .. "\n{FFFFFF}." .. table.concat(l,", .", 127, 162) .. "\n{FFFFFF}." .. table.concat(l,", .", 163, 195) .. "\n{FFFFFF}." .. table.concat(l,", .", 196, 230) .. "\n{FFFFFF}." .. table.concat(l,", .", 231, 264) .. "\n{FFFFFF}." .. table.concat(l,", .", 265, 274))
+							imgui.SameLine()
+							if imgui.Button(fa.ICON_FA_FORWARD .. u8" следующая страница", imgui.ImVec2(205, 25)) then
+								page = 2
+							end
+						elseif page == 2 then
+							imgui.TextColoredRGB("" .. d1 .. "Чтобы скрипт прекратил/начал отлавливать ссылки в чате (по умолчанию вкл), достаточно ввести команду: {FFFFFF}/flinkwork\n" .. d1 .. "Чтобы проверить наличие {FFFFFF}обновлений" .. d1 .. " скрипта, достаточно ввести {FFFFFF}/flinkupdcheck\n" .. d1 .. "Чтобы открыть историю {FFFFFF}обновлений" .. d1 .. " скрипта, достаточно ввести {FFFFFF}/flinkupdhistory\n" .. d1 .. "В скрипте имеется имгуи окно с тремя {FFFFFF}последними " .. d1 .. "найденными ссылками. Для активации окна: {FFFFFF}/flinkmn\n" .. d1 .. "Автор скрипта: {FFFFFF}https://vk.com/klamet1/" .. d1 .. ". Если вы нашли какой либо {FFFFFF}баг" .. d1 .. ", просто хотите выразить\n{FFFFFF}благодарность" .. d1 .. " или заказать какой либо {FFFFFF}скрипт" .. d1 .. ", вы можете это сделать во {FFFFFF}ВКонтакте\n" .. d1 .. "Также автор принимает и {FFFFFF}материальную благодарность" .. d1 .. ". Вы можете оформить перевод средств на мой {FFFFFF}QIWI\n" .. d1 .. "кошелек по {FFFFFF}никнейму" .. d1 .. ", мой никнейм в {FFFFFF}QIWI" .. d1 .. " кошельке: {FFFFFF}HADIV201" .. d1 .. ".\n{FFFFFF}Спасибо " .. d1 .. "за использование моего скрипта. {FFFFFF}Надеюсь" .. d1 .. ", что данный скрипт будет нести только пользу.")
+							imgui.SameLine()
+							if imgui.Button(fa.ICON_FA_BACKWARD.. u8" предыдущая страница", imgui.ImVec2(205, 25)) then
+								page = 1
+							end
+						end
+					end
+				imgui.PopFont()
+			imgui.EndChild()
+		end
 		imgui.End()
 	end
 	if two_window.v then
